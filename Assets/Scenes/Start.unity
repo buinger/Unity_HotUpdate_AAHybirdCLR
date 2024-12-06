@@ -151,7 +151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 014157b74085a0a4085e8c27b0e914ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneAddress: Assets/Scenes/HotSceneDemo.unity
+  mainScenePath: Assets/Scenes/HotSceneDemo.unity
 --- !u!4 &377478030
 Transform:
   m_ObjectHideFlags: 0
