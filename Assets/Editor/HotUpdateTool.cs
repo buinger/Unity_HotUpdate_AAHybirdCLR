@@ -11,9 +11,14 @@ using Unity.Plastic.Newtonsoft.Json;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Security.Principal;
+using System.Collections;
+using System.Text;
+using UnityEngine.Networking;
 
 public class HotUpdateTool
 {
+    // http://127.0.0.1:637/download/StandaloneWindows64/prefabs_assets_all_7b4fe100588677ea69caa8a22d341c10.bundle
+    private static string serverUrlHead = "http://127.0.0.1:637/";
 
     [MenuItem("资源操作/更新所有", priority = 100)]
     public static async void UpdateAll()
@@ -105,10 +110,117 @@ public class HotUpdateTool
         }
     }
 
+
+    [MenuItem("资源操作/上传所有到服务器", priority = 103)]
+    public async static void UpLoadAllToServer()
+    {
+        string[] filePath = Directory.GetFiles(GetNowPlatformHotUpdateFolderPath());
+
+        for (int i = 0; i < filePath.Length; i++)
+        {
+            if (i == 0)
+            {
+                await UploadFileAsync(filePath[i], true);
+            }
+            else
+            {
+                await UploadFileAsync(filePath[i]);
+            }
+        }
+
+        Debug.Log($"{EditorUserBuildSettings.activeBuildTarget.ToString()}平台所有热更资源上传完毕");
+
+        async Task UploadFileAsync(string filePath, bool clearFolder = false)
+        {
+            // 检查文件是否存在
+            if (!System.IO.File.Exists(filePath))
+            {
+                Debug.LogError("文件不存在: " + filePath);
+                return;
+            }
+
+            // 读取文件内容
+            byte[] fileData = System.IO.File.ReadAllBytes(filePath);
+
+            string clearFolderTail = clearFolder ? "&clearFolder=true" : "";
+            // 创建上传请求
+            UnityWebRequest request = new UnityWebRequest(GetUpLoadUrl() + clearFolderTail, UnityWebRequest.kHttpVerbPOST)
+            {
+                uploadHandler = new UploadHandlerRaw(fileData),
+                downloadHandler = new DownloadHandlerBuffer()
+            };
+
+            // 设置 Content-Type 为 multipart/form-data，并添加文件字段
+            string boundary = "----UnityFormBoundary";
+            request.SetRequestHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+            string fileName = Path.GetFileName(filePath);
+            // 构造表单数据
+            string formData =
+                $"--{boundary}\r\n" +
+               $"Content-Disposition: form-data; name=\"file\"; filename=\"{fileName}\"\r\n" +
+                "Content-Type: application/octet-stream\r\n\r\n" +
+                Encoding.UTF8.GetString(fileData) +
+                $"\r\n--{boundary}--\r\n";
+
+            // 将表单数据写入上传处理器
+            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(formData));
+
+            // 发送请求并等待响应
+            var operation = request.SendWebRequest();
+
+            while (!operation.isDone)
+            {
+                await Task.Yield(); // 异步等待完成
+            }
+
+            // 检查结果
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log("文件上传成功: " + request.downloadHandler.text);
+            }
+            else
+            {
+                Debug.LogError("文件上传失败: " + request.error);
+            }
+        }
+
+    }
+
+
+
+
+
+
+
+    private static string GetUpLoadUrl()
+    {
+        //private static string urlHead = "http://localhost:8080/upload/testFolder?password=123456";
+        string url = serverUrlHead + "upload/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=123456";
+        return url;
+    }
+
+    private static string GetDownUrl()
+    {
+        //private static string urlHead = "http://localhost:8080/upload/testFolder?password=123456";
+        string url = serverUrlHead + "download/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=123456";
+        return url;
+    }
+
+
     private static string GetNowPlatformHotUpdateFolderPath()
     {
+        // 获取目标目录路径
         string hotUpdateFolderPath = Application.persistentDataPath;
         hotUpdateFolderPath = hotUpdateFolderPath + "/HotUpdateData/" + EditorUserBuildSettings.activeBuildTarget.ToString();
+
+        // 如果目录不存在，则创建该目录
+        if (!Directory.Exists(hotUpdateFolderPath))
+        {
+            Directory.CreateDirectory(hotUpdateFolderPath);
+        }
+
+        // 返回文件夹路径
         return hotUpdateFolderPath;
     }
 

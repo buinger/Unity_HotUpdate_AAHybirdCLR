@@ -74,3 +74,4 @@ crashlytics-build.properties
 #热更相关
 /HybridCLRData
 /ServerData
+/HotUpdateServer/HotUpdateData
