@@ -8,16 +8,13 @@ using UnityEngine;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Unity.Plastic.Newtonsoft.Json;
-using NUnit.Framework;
 using System.Collections.Generic;
-using System.Security.Principal;
-using System.Collections;
 using System.Text;
 using UnityEngine.Networking;
 
 public class HotUpdateTool
 {
-    // http://127.0.0.1:637/download/StandaloneWindows64/prefabs_assets_all_7b4fe100588677ea69caa8a22d341c10.bundle
+    // http://127.0.0.1:637/download/StandaloneWindows64/ prefabs_assets_all_7b4fe100588677ea69caa8a22d341c10.bundle
     private static string serverUrlHead = "http://127.0.0.1:637/";
 
     [MenuItem("资源操作/更新所有", priority = 100)]
@@ -40,8 +37,6 @@ public class HotUpdateTool
 
         string GetOringnalDllPath()
         {
-            //D:/UnityProjects/Unity_HotUpdate_AAHybirdCLR/Assets
-            //D:\UnityProjects\Unity_HotUpdate_AAHybirdCLR\HybridCLRData\HotUpdateDlls\StandaloneWindows64\HotUpdateDll.dll
             string dllPath = Application.dataPath;
             dllPath = dllPath.Replace("Assets", "");
             dllPath = dllPath + "HybridCLRData/HotUpdateDlls/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "/HotUpdate.dll";
@@ -144,27 +139,30 @@ public class HotUpdateTool
 
             string clearFolderTail = clearFolder ? "&clearFolder=true" : "";
             // 创建上传请求
-            UnityWebRequest request = new UnityWebRequest(GetUpLoadUrl() + clearFolderTail, UnityWebRequest.kHttpVerbPOST)
-            {
-                uploadHandler = new UploadHandlerRaw(fileData),
-                downloadHandler = new DownloadHandlerBuffer()
-            };
+            UnityWebRequest request = new UnityWebRequest(GetUpLoadUrl() + clearFolderTail, UnityWebRequest.kHttpVerbPOST);
+
+            // 生成请求边界
+            string boundary = "----UnityFormBoundary";
+            byte[] boundaryBytes = Encoding.ASCII.GetBytes("\r\n--" + boundary + "\r\n");
+
+            // 构造表单数据
+            byte[] fileNameBytes = Encoding.UTF8.GetBytes($"Content-Disposition: form-data; name=\"file\"; filename=\"{Path.GetFileName(filePath)}\"\r\n");
+            byte[] fileHeaderBytes = Encoding.UTF8.GetBytes("Content-Type: application/octet-stream\r\n\r\n");
+
+            // 构造完整的 multipart 数据
+            List<byte> formData = new List<byte>();
+            formData.AddRange(boundaryBytes);
+            formData.AddRange(fileNameBytes);
+            formData.AddRange(fileHeaderBytes);
+            formData.AddRange(fileData); // 添加文件数据
+            formData.AddRange(Encoding.ASCII.GetBytes("\r\n--" + boundary + "--\r\n")); // 结束边界
+
+            // 设置上传处理器
+            request.uploadHandler = new UploadHandlerRaw(formData.ToArray());
+            request.downloadHandler = new DownloadHandlerBuffer();
 
             // 设置 Content-Type 为 multipart/form-data，并添加文件字段
-            string boundary = "----UnityFormBoundary";
             request.SetRequestHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
-
-            string fileName = Path.GetFileName(filePath);
-            // 构造表单数据
-            string formData =
-                $"--{boundary}\r\n" +
-               $"Content-Disposition: form-data; name=\"file\"; filename=\"{fileName}\"\r\n" +
-                "Content-Type: application/octet-stream\r\n\r\n" +
-                Encoding.UTF8.GetString(fileData) +
-                $"\r\n--{boundary}--\r\n";
-
-            // 将表单数据写入上传处理器
-            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(formData));
 
             // 发送请求并等待响应
             var operation = request.SendWebRequest();
@@ -184,6 +182,7 @@ public class HotUpdateTool
                 Debug.LogError("文件上传失败: " + request.error);
             }
         }
+
 
     }
 
