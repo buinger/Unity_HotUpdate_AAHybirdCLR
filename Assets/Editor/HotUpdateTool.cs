@@ -14,7 +14,6 @@ using UnityEngine.Networking;
 
 public class HotUpdateTool
 {
-    // http://127.0.0.1:637/download/StandaloneWindows64/ prefabs_assets_all_7b4fe100588677ea69caa8a22d341c10.bundle
     private static string serverUrlHead = "http://127.0.0.1:637/";
 
     [MenuItem("资源操作/更新所有", priority = 100)]

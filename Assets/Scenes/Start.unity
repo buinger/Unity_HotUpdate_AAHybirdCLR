@@ -151,8 +151,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 014157b74085a0a4085e8c27b0e914ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ifCheckUpdate: 1
   urlHead: http://127.0.0.1:637
-  CheckHotUpdateOnEditor: 0
   mainScenePath: Assets/Scenes/HotSceneDemo.unity
   loadingText: {fileID: 388926772}
 --- !u!4 &377478030
