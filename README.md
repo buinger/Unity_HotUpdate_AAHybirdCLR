@@ -1,6 +1,13 @@
 # Unity_HotUpdate_AAHybirdCLR 
 ### 基于Addressable+HybirdCLR的热更框架 
-# 配置说明
+
+
+# 一.开发规范（使用此热更框架需要遵循的）
+### 1.热更代码文件一律要放在Assets/ScriptsHot路径下
+### 2.热更资源一律要在Inspector中勾选Addressable选项
+
+
+# 二.配置说明
 #### 注：源工程虽已经配置好所有，但为了及防止不可预料的疏漏报错，建议按照说明从头配置一遍！如此即利于学习，也防止踩坑。
 ### **基础热更环境配置**
 1. PackageManager中导入AA,github中导入HybirdCLR
