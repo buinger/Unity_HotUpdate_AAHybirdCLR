@@ -16,7 +16,17 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: 7afe89a111710f54f9a71cf99737c3ca
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 3d551b002c69aea41a665341c630c87c
+    m_Address: Assets/Prefabs/Cube.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 521e8c96efd17504b974c8a446c3e8c9
+    m_Address: Assets/Prefabs/Cylinder.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 892a1ce99ff2e744b97841555ed1b128, type: 2}
   m_SchemaSet:

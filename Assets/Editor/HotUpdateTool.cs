@@ -57,12 +57,12 @@ public class HotUpdateTool
             return dllTargetPath;
             //C:/Users/Administrator/AppData/LocalLow/DefaultCompany/HotUpdate/HotUpdateData/StandaloneWindows64/HotUpdateDll.dll
         }
-
     }
 
     [MenuItem("资源操作/更新热更资源", priority = 101)]
     public static async Task UpdateHotUpdateAAbundle()
     {
+        ResourceEditor.SetAllAllAAPrefabName();
         AddressablesPlayerBuildResult result = null;
         AddressableAssetSettings.BuildPlayerContent(out result);
 

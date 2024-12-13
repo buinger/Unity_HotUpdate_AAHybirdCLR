@@ -5,6 +5,42 @@
 # 一.开发规范（使用此热更框架需要遵循的）
 ### 1.热更代码文件一律要放在Assets/ScriptsHot路径下
 ### 2.热更资源一律要在Inspector中勾选Addressable选项
+### 3.热更预制件一定要放在Assets/Prefabs路径下
+
+## 4对象池使用说明（可选，统一动态加载释放，优化性能）
+#### 0. 重点（每次加载新场景切记执行一次释放对象池函数）：
+```
+        //它能够清理池中所有null对象。
+        GameObjectPoolTool.Release();
+        //当然如果您不想跨场景复用池中对象，也可这样调用，这样会清空释放所有池对象。
+        GameObjectPoolTool.Release(true);
+```
+#### 1. 加载资源函数：
+```
+        //第一个bool变量，设定生成的物体是否可显示，设为false则生成后自动隐藏
+
+        //同步加载，返回GameObject
+        GameObjectPoolTool.GetFromPoolForce(true, "Addressable预制件路径");
+        //异步加载，返回GameObject
+        GameObjectPoolTool.GetFromPoolForceAsync(true, "Addressable预制件路径");
+        //(不常用)同步加载,返回GameObject,如果池中没有，会返回空
+        GameObjectPoolTool.GetFromPool(true, "Addressable预制件路径");
+```
+#### 2. 回收资源函数：
+```
+        //此函数参数只能回收对象池生成的GameObject，放其他GameObject,不符合这个对象池的设计理念，会报错。
+        //回收的资源将会存在对象池中，下次生成相同Addressable资源，会优先从对象池中取出
+        GameObjectPoolTool.PutInPool(对象池生成的GameObject);
+```
+#### 3. 不想回收资源：
+```
+        //您也可以直接销毁,不会影响对象池的逻辑
+        Destroy(对象池生成的GameObject);
+```
+#### 4. 附加（可选）：
+点击unity的上方工具栏中---资源操作/一键刷新热更预制件索引脚本，便能够将所有热更预制件挂上一个路径索引脚本（PrefabInfo）。通过这个脚本，可以实现在程序运行时，**通过预制件快速拿到它的Addressable地址（Addressable原生是不支持的）。如果有新的热更预制件，切记要点击一次**。这个功能会在**每次更新热更资源的时候执行一次，保证脚本路径和Addressable设定的路径一致**。
+
+
 
 
 # 二.配置说明

@@ -245,7 +245,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd60da0b2033d364596f0db3d7631f6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabAddress: Assets/Prefabs/Cylinder.prefab
+  targetGameObj: {fileID: -4241966221648573790, guid: 3d551b002c69aea41a665341c630c87c, type: 3}
 --- !u!4 &1103555865
 Transform:
   m_ObjectHideFlags: 0
