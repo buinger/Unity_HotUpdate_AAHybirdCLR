@@ -177,11 +177,11 @@ public class HotUpdateTool
             // 检查结果
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log("文件上传成功: " + request.downloadHandler.text);
+                Debug.Log("文件上传成功: " + filePath);
             }
             else
             {
-                Debug.LogError("文件上传失败: " + request.error);
+                Debug.LogError("文件上传失败: " + filePath + "-------------" + request.error);
             }
         }
 
