@@ -249,7 +249,7 @@ public class HotUpdateTool
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error reading JSON: {ex.Message}");
+            Debug.LogError($"Error reading JSON: {ex.Message}");
             return null;
         }
     }
