@@ -11,7 +11,7 @@
 #### 注：源工程虽已经配置好所有，但为了及防止不可预料的疏漏报错，建议按照说明从头配置一遍！如此即利于学习，也防止踩坑。
 ### **基础热更环境配置**
 1. PackageManager中导入AA,github中导入HybirdCLR
-2. 先做初始化，上方工具栏，点击**HybirdCLR/install**安装，然后点击**HybirdCLR/Generate/All**(此操作建议在每次在出工程包前点击)，确保文件夹AddressableAssetsData和HybridCLRGenerate存在于Assets根目录,然后在Unity-Preferences-Addressables设置中取消勾选 Debug Build Layout，**不然打包aa会报错**（虽然不重要，但是看着糟心）
+2. 先做初始化，上方工具栏，点击**HybirdCLR/install**安装，然后点击**HybirdCLR/Generate/All**(此操作建议在每次在出工程包前点击)，然后**进入Addressable面板，如果您是重头配置，需要点击，Create Addressable Settings**,确保文件夹AddressableAssetsData和HybridCLRGenerate存在于Assets根目录,然后在Unity-Preferences-Addressables设置中取消勾选 Debug Build Layout，**不然打包aa会报错**（虽然不重要，但是看着糟心）
 3. 接着配置AA的资源包的默认读写路径 ，在AddressableAssetSettings中的Profile中配置custom路径，BuildPath和LoadPath填写为"**[UnityEngine.Application.persistentDataPath]/[BuildTarget]**"，这两个路径是程序打包后资源包的输出路径和程序运行时读取资源包的路径（persistentDataPath是unity唯一的跨平台可读写路径）
 4. 配置AA的catlog.json(资源包索引文件)和他的hash文件生成位置，在AddressableAssetSettings文件中找到
 Catlog中的BuildRemoteCatolog,**在勾选后显出出来的Build&LoadPaths下拉列表选择Local**（这样catlog.json将会在热更资源打包后，生成到Profile配置的路径中，并且打包的程序运行时也会从这个路径中读取catlog.json。）
