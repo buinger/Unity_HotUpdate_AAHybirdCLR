@@ -14,7 +14,7 @@ using UnityEngine.Networking;
 
 public class HotUpdateTool
 {
-    private static string serverUrlHead = "http://127.0.0.1/";
+    private static string serverUrlHead = "http://127.0.0.1:637/";
 
     [MenuItem("资源操作/更新所有", priority = 100)]
     public static async void UpdateAll()

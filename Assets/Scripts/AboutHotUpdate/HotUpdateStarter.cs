@@ -19,7 +19,7 @@ public class HotUpdateStarter : MonoBehaviour
 {
     public bool ifCheckUpdate = false;
 
-    public string urlHead = "http://127.0.0.1";
+    public string urlHead = "http://127.0.0.1:637";
 
     public string mainScenePath; // ³¡¾°µÄ Addressable µØÖ·
     public Text loadingText;
