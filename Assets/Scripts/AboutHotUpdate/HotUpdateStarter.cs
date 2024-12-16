@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -18,7 +19,7 @@ public class HotUpdateStarter : MonoBehaviour
 {
     public bool ifCheckUpdate = false;
 
-    public string urlHead = "http://127.0.0.1:637";
+    public string urlHead = "http://127.0.0.1";
 
     public string mainScenePath; // 场景的 Addressable 地址
     public Text loadingText;
@@ -48,8 +49,7 @@ public class HotUpdateStarter : MonoBehaviour
     // Start is called before the first frame update
     async void Start()
     {
-
-
+        Debug.Log($"catalog_{Application.version}.hash");
         // Editor环境下，HotUpdate.dll.bytes已经被自动加载，不需要加载，重复加载反而会出问题。
 #if !UNITY_EDITOR
         if (ifCheckUpdate)
@@ -124,9 +124,9 @@ public class HotUpdateStarter : MonoBehaviour
         bool isBundleOld = false;
 
         //确认dll是否需要更新
-        string nowDllHash = ReadFileContents("HotUpdate.hash");
+        string nowDllHash = ReadLocalTxt("HotUpdate.hash");
         string serverDllHash = "";
-        StartCoroutine(ReadTextFile(HotUpdateDownLoadUrlHead + "HotUpdate.hash", (hash) =>
+        StartCoroutine(ReadNetTxt(HotUpdateDownLoadUrlHead + "HotUpdate.hash", (hash) =>
         {
             serverDllHash = hash;
         }));
@@ -141,9 +141,9 @@ public class HotUpdateStarter : MonoBehaviour
             isDllOld = true;
         }
         //确认boundle是否需要更新
-        string nowBoundleHash = ReadFileContents("catalog_0.1.hash");
+        string nowBoundleHash = ReadLocalTxt($"catalog_{Application.version}.hash");
         string serverBoundleHash = "";
-        StartCoroutine(ReadTextFile(HotUpdateDownLoadUrlHead + "catalog_0.1.hash", (hash) => { serverBoundleHash = hash; }));
+        StartCoroutine(ReadNetTxt(HotUpdateDownLoadUrlHead + $"catalog_{Application.version}.hash", (hash) => { serverBoundleHash = hash; }));
 
         while (serverBoundleHash == "")
         {
@@ -178,7 +178,7 @@ public class HotUpdateStarter : MonoBehaviour
             targetUpdatepercent = 20;
             yield return DownloadFile(HotUpdateDownLoadUrlHead + "HotUpdate.hash", Path.Combine(HotUpdateDataPath, "HotUpdate.hash"));
             targetUpdatepercent = 30;
-            yield return DownloadFile(HotUpdateDownLoadUrlHead + "catalog_0.1.json", Path.Combine(HotUpdateDataPath, "catalog_0.1.json"));
+            yield return DownloadFile(HotUpdateDownLoadUrlHead + $"catalog_{Application.version}.json", Path.Combine(HotUpdateDataPath, $"catalog_{Application.version}.json"));
             targetUpdatepercent = 75;
             List<string> boundleNames = GetAllBundleFileNamesByCatalogJson();
             foreach (var item in boundleNames)
@@ -186,7 +186,7 @@ public class HotUpdateStarter : MonoBehaviour
                 yield return DownloadFile(HotUpdateDownLoadUrlHead + item, Path.Combine(HotUpdateDataPath, item));
             }
             targetUpdatepercent = 90;
-            yield return DownloadFile(HotUpdateDownLoadUrlHead + "catalog_0.1.hash", Path.Combine(HotUpdateDataPath, "catalog_0.1.hash"));
+            yield return DownloadFile(HotUpdateDownLoadUrlHead + $"catalog_{Application.version}.hash", Path.Combine(HotUpdateDataPath, $"catalog_{Application.version}.hash"));
             targetUpdatepercent = 99;
             File.Delete(Path.Combine(HotUpdateDataPath, "Update.flag"));
 
@@ -209,7 +209,7 @@ public class HotUpdateStarter : MonoBehaviour
             }
             if (boundleUpdate)
             {
-                yield return DownloadFile(HotUpdateDownLoadUrlHead + "catalog_0.1.json", Path.Combine(HotUpdateDataPath, "catalog_0.1.json"));
+                yield return DownloadFile(HotUpdateDownLoadUrlHead + $"catalog_{Application.version}.json", Path.Combine(HotUpdateDataPath, $"catalog_{Application.version}.json"));
                 targetUpdatepercent = 30;
                 List<string> boundleNames = GetAllBundleFileNamesByCatalogJson();
 
@@ -244,7 +244,7 @@ public class HotUpdateStarter : MonoBehaviour
                 }
                 targetUpdatepercent = 80;
 
-                yield return DownloadFile(HotUpdateDownLoadUrlHead + "catalog_0.1.hash", Path.Combine(HotUpdateDataPath, "catalog_0.1.hash"));
+                yield return DownloadFile(HotUpdateDownLoadUrlHead + $"catalog_{Application.version}.hash", Path.Combine(HotUpdateDataPath, $"catalog_{Application.version}.hash"));
                 targetUpdatepercent = 85;
                 File.Delete(Path.Combine(HotUpdateDataPath, "Update.flag"));
                 targetUpdatepercent = 88;
@@ -262,7 +262,7 @@ public class HotUpdateStarter : MonoBehaviour
     List<string> GetAllBundleFileNamesByCatalogJson()
     {
         List<string> fileNames = new List<string>();
-        string jsonStr = ReadFileContents("catalog_0.1.json");
+        string jsonStr = ReadLocalTxt($"catalog_{Application.version}.json");
         Debug.Log(jsonStr);
 
         AAcatalogData catalogData = JsonConvert.DeserializeObject<AAcatalogData>(jsonStr);
@@ -278,7 +278,7 @@ public class HotUpdateStarter : MonoBehaviour
         return fileNames;
     }
 
-    string ReadFileContents(string fileName)
+    string ReadLocalTxt(string fileName)
     {
         string filePath = Path.Combine(HotUpdateDataPath, fileName);
         if (File.Exists(filePath))
@@ -414,7 +414,7 @@ public class HotUpdateStarter : MonoBehaviour
         // 检查是否有错误
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("下载文件失败: " + request.error);
+            Debug.LogError("下载文件失败: " + fileUrl +"------------------"+ request.error);
             Destroy(this);
         }
         else
@@ -434,7 +434,7 @@ public class HotUpdateStarter : MonoBehaviour
 
 
     // 下载文本文件并读取内容
-    IEnumerator ReadTextFile(string fileUrl, Action<string> onLoadOver = null)
+    IEnumerator ReadNetTxt(string fileUrl, Action<string> onLoadOver = null)
     {
         // 创建 UnityWebRequest 来获取文本文件
         UnityWebRequest request = UnityWebRequest.Get(fileUrl);
@@ -445,7 +445,7 @@ public class HotUpdateStarter : MonoBehaviour
         // 检查请求是否成功
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("下载文件失败: " + request.error);
+            Debug.LogError("下载文件失败: " + fileUrl + "------------------" + request.error);
             Destroy(this);
         }
         else

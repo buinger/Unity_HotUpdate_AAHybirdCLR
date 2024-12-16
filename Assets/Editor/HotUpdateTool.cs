@@ -14,7 +14,7 @@ using UnityEngine.Networking;
 
 public class HotUpdateTool
 {
-    private static string serverUrlHead = "http://127.0.0.1:637/";
+    private static string serverUrlHead = "http://127.0.0.1/";
 
     [MenuItem("资源操作/更新所有", priority = 100)]
     public static async void UpdateAll()
@@ -57,12 +57,12 @@ public class HotUpdateTool
             return dllTargetPath;
             //C:/Users/Administrator/AppData/LocalLow/DefaultCompany/HotUpdate/HotUpdateData/StandaloneWindows64/HotUpdateDll.dll
         }
-
     }
 
     [MenuItem("资源操作/更新热更资源", priority = 101)]
     public static async Task UpdateHotUpdateAAbundle()
     {
+        ResourceEditor.SetAllAllAAPrefabName();
         AddressablesPlayerBuildResult result = null;
         AddressableAssetSettings.BuildPlayerContent(out result);
 
@@ -102,7 +102,7 @@ public class HotUpdateTool
         string GetCatalogPath()
         {
             string dllTargetPath = Application.persistentDataPath;
-            dllTargetPath = dllTargetPath + "/HotUpdateData/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "/catalog_0.1.json";
+            dllTargetPath = dllTargetPath + "/HotUpdateData/" + EditorUserBuildSettings.activeBuildTarget.ToString() + $"/catalog_{Application.version}.json";
             return dllTargetPath;
         }
     }
@@ -181,7 +181,7 @@ public class HotUpdateTool
             }
             else
             {
-                Debug.LogError("文件上传失败: " + filePath + "-------------" + request.error);
+                Debug.LogError("文件上传失败: "+ filePath +"-------------"+ request.error);
             }
         }
 
