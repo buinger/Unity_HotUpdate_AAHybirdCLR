@@ -78,14 +78,17 @@ public class HotUpdateTool
             //Debug.Log(folderPath);
             string[] filePath = Directory.GetFiles(folderPath);
 
-            foreach (var item in filePath)
+            if (usefulBundleNames != null)
             {
-                if (item.Contains(".bundle"))
+                foreach (var item in filePath)
                 {
-                    string fileName = Path.GetFileName(item);
-                    if (!usefulBundleNames.Contains(fileName))
+                    if (item.Contains(".bundle"))
                     {
-                        File.Delete(item);
+                        string fileName = Path.GetFileName(item);
+                        if (!usefulBundleNames.Contains(fileName))
+                        {
+                            File.Delete(item);
+                        }
                     }
                 }
             }
