@@ -102,7 +102,7 @@ public class HotUpdateTool
         string GetCatalogPath()
         {
             string dllTargetPath = Application.persistentDataPath;
-            dllTargetPath = dllTargetPath + "/HotUpdateData/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "/catalog_0.1.json";
+            dllTargetPath = dllTargetPath + "/HotUpdateData/" + EditorUserBuildSettings.activeBuildTarget.ToString() + $"/catalog_{Application.version}.json";
             return dllTargetPath;
         }
     }
@@ -181,7 +181,7 @@ public class HotUpdateTool
             }
             else
             {
-                Debug.LogError("文件上传失败: " + filePath + "-------------" + request.error);
+                Debug.LogError("文件上传失败: "+ filePath +"-------------"+ request.error);
             }
         }
 
