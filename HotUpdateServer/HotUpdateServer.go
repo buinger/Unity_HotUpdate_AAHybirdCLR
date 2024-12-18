@@ -13,10 +13,12 @@ import (
 // 配置结构体
 type Config struct {
 	Password string `json:"password"`
+	Port     string `json:"port"`
 }
 
-// 全局变量存储密码
+// 全局变量存储密码和端口
 var validPassword string
+var serverPort string
 
 func main() {
 	// 读取配置文件
@@ -30,9 +32,9 @@ func main() {
 	http.HandleFunc("/upload/", uploadFile)     // 上传文件接口
 	http.HandleFunc("/download/", downloadFile) // 下载文件接口
 
-	// 启动服务器并监听 8080 端口
-	fmt.Println("服务器已启动，监听 637 端口...")
-	err = http.ListenAndServe(":637", nil)
+	// 启动服务器并监听端口
+	fmt.Println("服务器已启动，监听 " + serverPort + " 端口...")
+	err = http.ListenAndServe(":"+serverPort, nil)
 	if err != nil {
 		fmt.Println("启动服务器失败:", err)
 	}
@@ -59,6 +61,11 @@ func loadConfig(filePath string) error {
 	// 设置密码
 	validPassword = config.Password
 	fmt.Println(config.Password)
+
+	// 设置端口
+	serverPort = config.Port
+	fmt.Println(serverPort)
+
 	return nil
 }
 
