@@ -14,7 +14,7 @@ using UnityEngine.Networking;
 
 public class HotUpdateTool
 {
-    private static string serverUrlHead = "http://127.0.0.1:637/";
+    private static string serverUrlHead = "http://127.0.0.1:637";
 
     [MenuItem("资源操作/更新所有", priority = 100)]
     public static async void UpdateAll()
@@ -197,14 +197,14 @@ public class HotUpdateTool
     private static string GetUpLoadUrl()
     {
         //private static string urlHead = "http://localhost:8080/upload/testFolder?password=123456";
-        string url = serverUrlHead + "upload/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=123456";
+        string url = serverUrlHead + "/upload/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=123456";
         return url;
     }
 
     private static string GetDownUrl()
     {
         //private static string urlHead = "http://localhost:8080/upload/testFolder?password=123456";
-        string url = serverUrlHead + "download/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=123456";
+        string url = serverUrlHead + "/download/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=123456";
         return url;
     }
 

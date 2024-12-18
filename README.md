@@ -28,7 +28,7 @@ Catlog中的BuildRemoteCatolog,**在勾选后显出出来的Build&LoadPaths下�
 
 ### **网络热更环境配置**
 1. 紧接基础热更环境配置，先编译工程目录下的HotUpdateServer\HotUpdateServer.go，关于go语言如何配置环境和编译，可以自行百度，编译成功后会生成一个HotUpdateServer.exe文件（假设你的服务器是windows系统），**这个文件是热更服务器程序**。
-2. 将HotUpdateServer.exe和工程目录下的HotUpdateServer\config.json，放在您的服务器上的文件夹里，运行HotUpdateServer.exe（工程中默认在本机直接运行测试，**正式部署的话，请运行在外网服务器**）。如果是正式环境，修改Assets/Editor/HotUpdateTool.cs文件中的 **"http://127.0.0.1:637/"**，ip为外网服务器的ip，端口号不变;
+2. 将HotUpdateServer.exe和工程目录下的HotUpdateServer\config.json，放在您的服务器上的文件夹里，运行HotUpdateServer.exe（工程中默认在本机直接运行测试，**正式部署的话，请运行在外网服务器**）。如果是正式环境，修改Assets/Editor/HotUpdateTool.cs文件中的 **"http://127.0.0.1:637"**，ip为外网服务器的ip，端口号不变;
 3. 在您的启动场景Assets/Scenes/Start.unity中，找到您之前挂的HotUpdateStarter组件，**勾选ifCheckUpdate变量，并在 urlHead 变量中填入http请求url头："http://127.0.0.1:637"(正式部署请把ip改成您服务器ip)  这样程序启动时会自动检查热更资源**，最后一个变量是loadingText，是UGUI的文本组件，需要拖拽一个，**这是用来显示更新进度的组件**。
 4. 接下来进行测试就好，在unity工具栏点击**资源操作-更新所有**，热更资源更新后，再点击**资源操作-上传所有到服务器**，这样热更资源就会上传到服务器，**上传的数据，在您服务程序运行目录的HotUpdateData文件夹中**。
 5. 打包运行您的unity工程，因为**目前服务端的热更数据和您本机数据是一样的不会触发更新**。
