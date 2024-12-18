@@ -62,7 +62,7 @@ public class HotUpdateTool
     [MenuItem("资源操作/更新热更资源", priority = 101)]
     public static async Task UpdateHotUpdateAAbundle()
     {
-        ResourceEditor.SetAllAllAAPrefabName();
+        //ResourceEditor.SetAllAllAAPrefabName();
         AddressablesPlayerBuildResult result = null;
         AddressableAssetSettings.BuildPlayerContent(out result);
 
