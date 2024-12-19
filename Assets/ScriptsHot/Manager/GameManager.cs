@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class GameManager : Manager<GameManager>
 {
-    public Material highLightMat;
-
     protected override void Ini()
     {
         DontDestroyOnLoad(gameObject);
