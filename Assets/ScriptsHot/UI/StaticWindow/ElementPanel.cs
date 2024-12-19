@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Unity.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -117,7 +115,7 @@ public abstract class ElementDragPanel<T> : ElementPanel<T>
         Image containerImage = elementContainer.GetComponent<Image>();
         if (containerImage == null)
         {
-            containerImage = elementContainer.AddComponent<Image>();
+            containerImage = elementContainer.gameObject.AddComponent<Image>();
             containerImage.color = new Color(0, 0, 0, 0);
         }
         ScrollRect scrollRect = GetComponentInChildren<ScrollRect>();
