@@ -17,6 +17,36 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 05f86040597e91941bc56581c9d57a3c
   m_SerializeEntries:
+  - m_GUID: 03d153fd82f6ab84fa19579682e187ce
+    m_Address: Assets/Prefabs/Ui/RuntimeWindow/NoCoverTip_Window.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1dec7f6b6c463894ead615ad0deb99a3
+    m_Address: Assets/Prefabs/Ui/RuntimeWindow/PictureConfirm_Window.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c7e9f502b20fd5468f81692596dd464
+    m_Address: Assets/Prefabs/Ui/RuntimeWindow/ConfirmAndCancel_Window.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4c0e624d04d0107459f208603002adec
+    m_Address: Assets/Prefabs/Ui/RuntimeWindow/Loading_Window.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4ffa29dc2f2a35d47a58677874353b12
+    m_Address: Assets/Prefabs/Ui/RuntimeWindow/InvisiableCover_Window.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f6df9973efdd604fb3e2d73ed54e841
+    m_Address: Assets/Prefabs/Ui/RuntimeWindow/Tip_Window.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a996a96ae09b8ab40a5a077a3d272ed7
     m_Address: Assets/Prefabs/Sphere.prefab
     m_ReadOnly: 0

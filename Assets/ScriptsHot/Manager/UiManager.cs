@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UiManager : Manager<UiManager>
 {
+    [Header("测试用，右键脚本生成选择窗口")]
+    public CommonWindowType type;
+
     [SerializeField, Header("常用窗口ui资源索引")]
     private PrefabInfo InvisiableCover_Window;
     [SerializeField]
@@ -42,6 +44,13 @@ public class UiManager : Manager<UiManager>
     }
     List<RunTimeWindow> allRunTimeWindows = new List<RunTimeWindow>();
     protected override void Ini() { }
+
+
+    [ContextMenu("生成窗口")]
+    private void TestCommonWindow()
+    {
+        ShowCommonRunTimeWindow(type, "测试文本");
+    }
 
     /// <summary>
     /// 展示窗口
@@ -103,7 +112,7 @@ public class UiManager : Manager<UiManager>
                 (uiWin as PictureConfirm_Window).SetTextAndSprite(data as ImageTipData);
                 break;
             case CommonWindowType.ConfirmAndCancel:
-                (uiWin as ConfirmAndCancel_Window).SetAllValue(data as ConfirmTipData);
+                (uiWin as ConfirmAndCancel_Window).SetAllValue(data as ConfirmAndCancelData);
                 break;
         }
 
@@ -231,7 +240,7 @@ public class UiManager : Manager<UiManager>
     /// <summary>
     /// 回收所有动态窗口
     /// </summary>
-    public void CloseAllRunTimeWindows()
+    public void ReleaseAllRunTimeWindows()
     {
         foreach (var item in allRunTimeWindows)
         {

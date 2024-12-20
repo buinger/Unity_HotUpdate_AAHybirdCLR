@@ -8,7 +8,7 @@ public class ConfirmAndCancel_Window : Tip_Window
 {
     public Button confirmButton;
 
-    public void SetAllValue(ConfirmTipData data)
+    public void SetAllValue(ConfirmAndCancelData data)
     {
         confirmButton.onClick.RemoveAllListeners();
         confirmButton.onClick.AddListener(() =>
@@ -26,12 +26,12 @@ public class ConfirmAndCancel_Window : Tip_Window
 }
 
 
-public class ConfirmTipData
+public class ConfirmAndCancelData
 {
     public string tipString;
     public Action confirmEvent;
 
-    public ConfirmTipData(string tipStr, Action confirmEvent)
+    public ConfirmAndCancelData(string tipStr, Action confirmEvent)
     {
         tipString = tipStr;
         this.confirmEvent = confirmEvent;
