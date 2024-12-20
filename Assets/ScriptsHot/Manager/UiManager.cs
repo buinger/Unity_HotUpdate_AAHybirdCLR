@@ -9,87 +9,39 @@ using UnityEngine.UI;
 public class UiManager : Manager<UiManager>
 {
     [SerializeField, Header("常用窗口ui资源索引")]
-    private PrefabInfo maskWin;
+    private PrefabInfo InvisiableCover_Window;
     [SerializeField]
-    private PrefabInfo loadMaskWin;
+    private PrefabInfo Loading_Window;
     [SerializeField]
-    private PrefabInfo tipWin;
+    private PrefabInfo Tip_Window;
     [SerializeField]
-    private PrefabInfo viewTipWin;
+    private PrefabInfo NoCoverTip_Window;
     [SerializeField]
-    private PrefabInfo imageTipWin;
+    private PrefabInfo PictureConfirm_Window;
     [SerializeField]
-    private PrefabInfo confirmTipWin;
+    private PrefabInfo ConfirmAndCancel_Window;
 
+    private static GraphicRaycaster graphicRaycaster;
+    private static EventSystem eventSystem;
+    private static PointerEventData eventData;
 
-
-    [SerializeField, Header("常用元素ui资源索引")]
-    public PrefabInfo itemUi;
-    public PrefabInfo missionUi;
-    public PrefabInfo rewardUi;
-    public PrefabInfo heChengTiaoUi;
-
-
-
-    List<RunTimeWindow> allUiWindows = new List<RunTimeWindow>();
-    List<RunTimeElement> allUiElements = new List<RunTimeElement>();
-
-
-    static MainBook firstBook;
     static MainBook nowBook;
-
-
     public static MainBook NowBook
     {
-        set { nowBook = value; }
+        set
+        {
+            nowBook = value;
+            graphicRaycaster = NowBook.GetComponent<GraphicRaycaster>();
+            eventSystem = EventSystem.current;
+            eventData = new PointerEventData(eventSystem);
+        }
         get
         {
-            if (nowBook == null)
-            {
-                return firstBook;
-            }
-            else
-            {
-                return nowBook;
-            }
+            return nowBook;
         }
     }
-
-
-    private GraphicRaycaster graphicRaycaster;
-    private EventSystem eventSystem;
-    private PointerEventData eventData;
-
-
-
-
-
-    /// <summary>
-    /// 获取ui元素
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    public RunTimeElement GetUiElement(string path)
-    {
-        if (path == "")
-        {
-            Debug.LogError("路径为空");
-            return null;
-        }
-
-        GameObject targetGameObj = GameObjectPoolTool.GetFromPoolForce(true, path);
-        RunTimeElement runTimeElement = targetGameObj.GetComponent<RunTimeElement>();
-        RegisterElement(runTimeElement);
-        return runTimeElement;
-
-        void RegisterElement(RunTimeElement uiElement)
-        {
-            if (!allUiElements.Contains(uiElement))
-            {
-                allUiElements.Add(uiElement);
-            }
-        }
-    }
+    List<RunTimeWindow> allRunTimeWindows = new List<RunTimeWindow>();
+    protected override void Ini() { }
 
     /// <summary>
     /// 展示窗口
@@ -97,32 +49,37 @@ public class UiManager : Manager<UiManager>
     /// <typeparam name="T"></typeparam>
     /// <param name="data"></param>
     /// <returns></returns>
-    public RunTimeWindow ShowUiWindow(CommonWindowType type, object data = null)
+    public RunTimeWindow ShowCommonRunTimeWindow(CommonWindowType type, object data)
     {
         string path = "";
 
         switch (type)
         {
-            case CommonWindowType.透明遮挡:
-                path = maskWin.path;
+            case CommonWindowType.InvisiableCover:
+
+                path = InvisiableCover_Window.path;
                 break;
-            case CommonWindowType.加载:
-                path = loadMaskWin.path;
+            case CommonWindowType.Loading:
+
+                path = Loading_Window.path;
                 break;
-            case CommonWindowType.提示:
-                path = tipWin.path;
+            case CommonWindowType.Tip:
+
+                path = Tip_Window.path;
                 break;
-            case CommonWindowType.无遮挡提示:
-                path = viewTipWin.path;
+            case CommonWindowType.NoCoverTip:
+
+                path = NoCoverTip_Window.path;
                 break;
-            case CommonWindowType.图片提示:
-                path = imageTipWin.path;
+            case CommonWindowType.PictureConfirm:
+
+                path = PictureConfirm_Window.path;
                 break;
-            case CommonWindowType.确认与取消:
-                path = confirmTipWin.path;
+            case CommonWindowType.ConfirmAndCancel:
+
+                path = ConfirmAndCancel_Window.path;
                 break;
         }
-
 
         if (path == "")
         {
@@ -132,32 +89,34 @@ public class UiManager : Manager<UiManager>
 
         GameObject targetGameObj = GameObjectPoolTool.GetFromPoolForce(true, path);
         RunTimeWindow uiWin = targetGameObj.GetComponent<RunTimeWindow>();
-        RegisterWindow(uiWin);
+        RegisterRunTimeWindow(uiWin);
 
         switch (type)
         {
-            case CommonWindowType.提示:
+            case CommonWindowType.Tip:
                 (uiWin as Tip_Window).SetTextValue(data.ToString());
                 break;
-            case CommonWindowType.无遮挡提示:
-                (uiWin as ViewTip_Window).SetTextValue(data.ToString());
+            case CommonWindowType.NoCoverTip:
+                (uiWin as NoCoverTip_Window).SetTextValue(data.ToString());
                 break;
-            case CommonWindowType.图片提示:
-                (uiWin as ImageTip_Window).SetTextAndSprite(data as ImageTipData);
+            case CommonWindowType.PictureConfirm:
+                (uiWin as PictureConfirm_Window).SetTextAndSprite(data as ImageTipData);
                 break;
-            case CommonWindowType.确认与取消:
-                (uiWin as ConfirmTip_Window).SetAllValue(data as ConfirmTip_Window.IniData);
+            case CommonWindowType.ConfirmAndCancel:
+                (uiWin as ConfirmAndCancel_Window).SetAllValue(data as ConfirmTipData);
                 break;
         }
 
         return uiWin;
     }
 
-
-
-
-
-    public T ShowUiWindow<T>(string winResourcePath)
+    /// <summary>
+    /// 展示一个自定义窗口
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="winResourcePath"></param>
+    /// <returns></returns>
+    public T ShowCustomRunTimeWindow<T>(string winResourcePath) where T : RunTimeWindow
     {
         GameObject winObj = GameObjectPoolTool.GetFromPoolForce(true, winResourcePath);
         if (winObj == null)
@@ -173,29 +132,27 @@ public class UiManager : Manager<UiManager>
         }
 
         RunTimeWindow uiWin = winObj.GetComponent<RunTimeWindow>();
-        RegisterWindow(uiWin);
+        RegisterRunTimeWindow(uiWin);
         return winT;
     }
-
-
 
     /// <summary>
     /// 注册窗口
     /// </summary>
     /// <param name="uiWin"></param>
-    void RegisterWindow(RunTimeWindow uiWin)
+    void RegisterRunTimeWindow(RunTimeWindow uiWin)
     {
-        if (!allUiWindows.Contains(uiWin))
+        if (!allRunTimeWindows.Contains(uiWin))
         {
-            allUiWindows.Add(uiWin);
+            allRunTimeWindows.Add(uiWin);
         }
     }
 
     /// <summary>
-    /// 是否在UI上
+    /// 屏幕坐标是否在UI上
     /// </summary>
     /// <returns></returns>
-    public bool IsOnUIElement(Vector3 screenPostion, Action<GameObject> onGetTargetUi = null)
+    public bool IsPointOnUIElement(Vector3 screenPostion, Action<GameObject> onGetTargetUi = null)
     {
         if (graphicRaycaster == null)
         {
@@ -220,12 +177,11 @@ public class UiManager : Manager<UiManager>
         return false;
     }
 
-
     /// <summary>
-    /// 获取鼠标ui
+    /// 获取屏幕坐标上的UI元素
     /// </summary>
     /// <returns></returns>
-    public GameObject GetMouseUIElement(Vector3 screenPostion)
+    public GameObject GetPointUiElement(Vector3 screenPostion)
     {
         if (graphicRaycaster == null)
         {
@@ -247,10 +203,10 @@ public class UiManager : Manager<UiManager>
     }
 
     /// <summary>
-    /// 获取鼠标所有ui
+    /// 获取屏幕坐标穿透的所有UI元素
     /// </summary>
     /// <returns></returns>
-    public List<GameObject> GetMouseUIElements(Vector3 screenPostion)
+    public List<GameObject> GetPointUiElements(Vector3 screenPostion)
     {
         if (graphicRaycaster == null)
         {
@@ -273,48 +229,24 @@ public class UiManager : Manager<UiManager>
     }
 
     /// <summary>
-    /// 回收所有窗口
+    /// 回收所有动态窗口
     /// </summary>
-    public void CloseAllWindows()
+    public void CloseAllRunTimeWindows()
     {
-        foreach (var item in allUiWindows)
+        foreach (var item in allRunTimeWindows)
         {
-            GameObjectPoolTool.PutInPool(item.gameObject);
+            if (item != null)
+            {
+                GameObjectPoolTool.PutInPool(item.gameObject);
+            }
         }
+        allRunTimeWindows.Clear();
     }
 
     /// <summary>
-    /// 回收所有元素
+    /// 延迟到下一帧执行事件
     /// </summary>
-    public void CloseAllElements()
-    {
-        foreach (var item in allUiElements)
-        {
-            GameObjectPoolTool.PutInPool(item.gameObject);
-        }
-    }
-
-    void UpdateUiComponet()
-    {
-        graphicRaycaster = NowBook.GetComponent<GraphicRaycaster>();
-        eventSystem = EventSystem.current;
-        eventData = new PointerEventData(eventSystem);
-    }
-    protected override void Ini()
-    {
-        SceneManager.sceneLoaded += (scene, type) =>
-        {
-            if (LoadSceneMode.Single == type)
-            {
-                UpdateUiComponet();
-            }
-        };
-        firstBook = FindObjectOfType<MainBook>();
-
-        DontDestroyOnLoad(firstBook);
-        UpdateUiComponet();
-    }
-
+    /// <param name="action"></param>
     public static void DoDelayFreamDo(Action action)
     {
         instance.StartCoroutine(DelayFreamDo(action));
@@ -326,6 +258,12 @@ public class UiManager : Manager<UiManager>
         }
     }
 
+    /// <summary>
+    /// 设置ui的按下抬起等事件
+    /// </summary>
+    /// <param name="triggerComponent"></param>
+    /// <param name="mouseFun"></param>
+    /// <param name="triggerType"></param>
     public static void SetTriggerEvent(Graphic triggerComponent, Action mouseFun, EventTriggerType triggerType)
     {
         EventTrigger eventTrigger = triggerComponent.GetComponent<EventTrigger>();
@@ -364,12 +302,21 @@ public class UiManager : Manager<UiManager>
 
 }
 
+
 public enum CommonWindowType
 {
-    透明遮挡,
-    加载,
-    提示,
-    无遮挡提示,
-    图片提示,
-    确认与取消
+    //透明窗口，用于阻止用户点击其他ui
+    InvisiableCover,
+    //加载窗口
+    Loading,
+    //有遮罩提示窗口
+    Tip,
+    //无遮罩提示窗口
+    NoCoverTip,
+    //图片提示窗口
+    PictureConfirm,
+    //确认取消窗口
+    ConfirmAndCancel
 }
+
+

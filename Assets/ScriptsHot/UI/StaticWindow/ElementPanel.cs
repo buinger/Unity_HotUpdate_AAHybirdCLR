@@ -168,7 +168,7 @@ public abstract class ElementDragPanel<T> : ElementPanel<T>
     {
         holdingPassTime = 0;
         holdingBreak = false;
-        GameObject downObj = UiManager.instance.GetMouseUIElement(Input.mousePosition);
+        GameObject downObj = UiManager.instance.GetPointUiElement(Input.mousePosition);
         if (elementGameObjs.Contains(downObj))
         {
             clickDownElement = downObj;
@@ -194,7 +194,7 @@ public abstract class ElementDragPanel<T> : ElementPanel<T>
                 holdingPassTime = 0;
                 if (holdingBreak == false)
                 {
-                    GameObject uiGameObj = UiManager.instance.GetMouseUIElement(Input.mousePosition);
+                    GameObject uiGameObj = UiManager.instance.GetPointUiElement(Input.mousePosition);
                     if (uiGameObj != null && elementGameObjs.Contains(uiGameObj) && uiGameObj == clickDownElement)
                     {
                         gridLayoutGroup.enabled = false;
@@ -215,7 +215,7 @@ public abstract class ElementDragPanel<T> : ElementPanel<T>
     {
         if (nowDragElement != null && elementGameObjs.Contains(nowDragElement))
         {
-            List<GameObject> allUis = UiManager.instance.GetMouseUIElements(Input.mousePosition);
+            List<GameObject> allUis = UiManager.instance.GetPointUiElements(Input.mousePosition);
             nowDragElement.transform.SetParent(elementContainer);
             if (allUis.Count <= 1)
             {
@@ -250,7 +250,7 @@ public abstract class ElementDragPanel<T> : ElementPanel<T>
                 }
                 else
                 {
-                    List<GameObject> gameos = UiManager.instance.GetMouseUIElements(Input.mousePosition);
+                    List<GameObject> gameos = UiManager.instance.GetPointUiElements(Input.mousePosition);
 
 
                     if ((!gameos.Contains(bkg)) && nowDragElementLastSiblingIndex >= 0)

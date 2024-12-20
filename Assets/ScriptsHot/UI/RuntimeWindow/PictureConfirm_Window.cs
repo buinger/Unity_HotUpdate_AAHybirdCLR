@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ImageTip_Window : Tip_Window
+public class PictureConfirm_Window : Tip_Window
 {
    public MaskableGraphic imager;
 
