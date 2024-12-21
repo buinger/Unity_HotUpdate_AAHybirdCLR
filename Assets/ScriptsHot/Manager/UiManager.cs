@@ -10,6 +10,10 @@ public class UiManager : Manager<UiManager>
     [Header("测试用，右键脚本生成选择窗口")]
     public CommonWindowType type;
 
+    //Canvas 的逻辑宽高
+    public static Vector2 ScreenLogicalSize = new Vector2(1920, 1080);
+
+
     [SerializeField, Header("常用窗口ui资源索引")]
     private PrefabInfo InvisiableCover_Window;
     [SerializeField]
@@ -33,6 +37,8 @@ public class UiManager : Manager<UiManager>
         set
         {
             nowBook = value;
+            Canvas canvas = nowBook.GetComponent<Canvas>();
+            ScreenLogicalSize = canvas.GetComponent<RectTransform>().sizeDelta;
             graphicRaycaster = NowBook.GetComponent<GraphicRaycaster>();
             eventSystem = EventSystem.current;
             eventData = new PointerEventData(eventSystem);

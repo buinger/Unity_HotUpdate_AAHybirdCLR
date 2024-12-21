@@ -102,4 +102,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shortName: InvisiableCover_Window
-  path: Assets/Prefabs/Ui/RuntimeWindow/InvisiableCover_Window.prefab
+  path: Assets/Prefabs/Ui/RuntimeWindow/Common/InvisiableCover_Window.prefab

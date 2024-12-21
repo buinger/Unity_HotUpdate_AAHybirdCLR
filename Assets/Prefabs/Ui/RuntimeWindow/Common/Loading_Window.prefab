@@ -183,4 +183,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shortName: Loading_Window
-  path: Assets/Prefabs/Ui/RuntimeWindow/Loading_Window.prefab
+  path: Assets/Prefabs/Ui/RuntimeWindow/Common/Loading_Window.prefab

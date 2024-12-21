@@ -246,7 +246,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89ba07576ca74264f804f7d6a35d880b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 0
+  type: 1
   InvisiableCover_Window: {fileID: -3752613648851389042, guid: 4ffa29dc2f2a35d47a58677874353b12, type: 3}
   Loading_Window: {fileID: 4034456456296381620, guid: 4c0e624d04d0107459f208603002adec, type: 3}
   Tip_Window: {fileID: 900892400463183358, guid: 8f6df9973efdd604fb3e2d73ed54e841, type: 3}

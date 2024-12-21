@@ -342,7 +342,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shortName: ConfirmAndCancel_Window
-  path: Assets/Prefabs/Ui/RuntimeWindow/ConfirmAndCancel_Window.prefab
+  path: Assets/Prefabs/Ui/RuntimeWindow/Common/ConfirmAndCancel_Window.prefab
 --- !u!1 &4418800388813496924
 GameObject:
   m_ObjectHideFlags: 0
