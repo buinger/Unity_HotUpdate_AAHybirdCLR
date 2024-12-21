@@ -1,29 +1,24 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-
 using System.Text;
 using UnityEditor.AddressableAssets.Settings;
-
 using UnityEditor.AddressableAssets;
-
-
-#if UNITY_EDITOR
 using UnityEditor;
-#endif
+
 public class ResourceEditor : MonoBehaviour
 {
 #if UNITY_EDITOR
 
+
     [MenuItem("资源操作/一键刷新热更预制件索引脚本")]
-    public static void SetAllAllAAPrefabName()
+    public static void SetAllAAPrefabName()
     {
         string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Prefabs" });
 
         // 获取 AddressableAssetSettings，确保 Addressables 系统已经初始化
         AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
-        List<string> allPath= new List<string>();
+        List<string> allPath = new List<string>();
         // 遍历所有组
         foreach (var group in settings.groups)
         {
@@ -32,6 +27,18 @@ public class ResourceEditor : MonoBehaviour
             {
                 // 打印资源的路径
                 string assetPath = entry.AssetPath;
+                // 获取当前地址
+                string oldPath = entry.address;
+
+                // 更新地址
+                if (oldPath != assetPath)
+                {
+                    entry.SetAddress(assetPath);
+                    Debug.Log($"Updated Address: {oldPath} -> {assetPath}");
+                    settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, null, true);
+                    AssetDatabase.SaveAssets();
+                }
+
                 allPath.Add(assetPath);
             }
         }
