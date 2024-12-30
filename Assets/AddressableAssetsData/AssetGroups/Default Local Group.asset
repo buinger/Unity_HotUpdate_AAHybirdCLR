@@ -27,6 +27,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f131b235c12269945b11248e22d50e1b
+    m_Address: Assets/Scenes/UiFrameworkDemo.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 892a1ce99ff2e744b97841555ed1b128, type: 2}
   m_SchemaSet:
