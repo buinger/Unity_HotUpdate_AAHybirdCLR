@@ -184,12 +184,20 @@ public class HotUpdateTool
             {
                 Debug.LogError("文件上传失败: " + filePath + "-------------" + request.error);
             }
+            // 释放相关资源
+            request.uploadHandler?.Dispose();  // Dispose of UploadHandlerRaw
+            request.downloadHandler?.Dispose();  // Dispose of DownloadHandlerBuffer
+            request.Dispose();  // Dispose of UnityWebRequest itself
+
+            formData.Clear();  // 清空 List<byte>
+            formData = null;  // 手动将引用设为 null
+            fileData = null;  // 手动将文件数据引用设为 null
         }
 
 
     }
 
-     [MenuItem("资源操作/打开当前平台热更资源文件夹", priority = 109)]
+    [MenuItem("资源操作/打开当前平台热更资源文件夹", priority = 109)]
     public static void OpenTargetHotSourceFolder()
     {
         string pPath = Application.persistentDataPath;
