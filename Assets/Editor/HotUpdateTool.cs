@@ -189,7 +189,13 @@ public class HotUpdateTool
 
     }
 
-
+     [MenuItem("资源操作/打开当前平台热更资源文件夹", priority = 109)]
+    public static void OpenTargetHotSourceFolder()
+    {
+        string pPath = Application.persistentDataPath;
+        string folderPath = pPath + "/HotUpdateData/" + EditorUserBuildSettings.activeBuildTarget.ToString();
+        System.Diagnostics.Process.Start(folderPath);
+    }
 
 
     [MenuItem("资源操作/一键刷新热更预制件索引脚本", priority = 102)]
