@@ -1,0 +1,4 @@
+{
+    "dotnet.preferCSharpExtension": true,
+    "dotnet.defaultSolution": "Unity_HotUpdate_AAHybirdCLR.sln"
+}
