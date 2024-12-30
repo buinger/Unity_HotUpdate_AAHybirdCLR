@@ -181,7 +181,7 @@ public class HotUpdateTool
             }
             else
             {
-                Debug.LogError("文件上传失败: "+ filePath +"-------------"+ request.error);
+                Debug.LogError("文件上传失败: " + filePath + "-------------" + request.error);
             }
         }
 
@@ -190,7 +190,13 @@ public class HotUpdateTool
 
 
 
-
+    [MenuItem("资源操作/打开当前平台热更资源文件夹", priority = 104)]
+    public static void OpenTargetHotSourceFolder()
+    {
+        string pPath = Application.persistentDataPath;
+        string folderPath = pPath + "/HotUpdateData/" + EditorUserBuildSettings.activeBuildTarget.ToString();
+        System.Diagnostics.Process.Start(folderPath);
+    }
 
 
 
