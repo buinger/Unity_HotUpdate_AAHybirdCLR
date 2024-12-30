@@ -20,7 +20,7 @@ public class HotUpdateStarter : MonoBehaviour
 
     public string urlHead = "http://127.0.0.1:637";
 
-    public string mainScenePath; // ³¡¾°µÄ Addressable µØÖ·
+    public string mainScenePath; // åœºæ™¯çš„ Addressable åœ°å€
     public Text loadingText;
 
 
@@ -49,7 +49,7 @@ public class HotUpdateStarter : MonoBehaviour
     async void Start()
     {
         Debug.Log($"catalog_{Application.version}.hash");
-        // Editor»·¾³ÏÂ£¬HotUpdate.dll.bytesÒÑ¾­±»×Ô¶¯¼ÓÔØ£¬²»ĞèÒª¼ÓÔØ£¬ÖØ¸´¼ÓÔØ·´¶ø»á³öÎÊÌâ¡£
+        // Editorç¯å¢ƒä¸‹ï¼ŒHotUpdate.dll.byteså·²ç»è¢«è‡ªåŠ¨åŠ è½½ï¼Œä¸éœ€è¦åŠ è½½ï¼Œé‡å¤åŠ è½½åè€Œä¼šå‡ºé—®é¢˜ã€‚
 #if !UNITY_EDITOR
         if (ifCheckUpdate)
         {
@@ -62,10 +62,10 @@ public class HotUpdateStarter : MonoBehaviour
         Assembly hotUpdateAss = Assembly.Load(File.ReadAllBytes(GetTargetDllPath()));
 #else
 
-        // EditorÏÂÎŞĞè¼ÓÔØ£¬Ö±½Ó²éÕÒ»ñµÃHotUpdate³ÌĞò¼¯
+        // Editorä¸‹æ— éœ€åŠ è½½ï¼Œç›´æ¥æŸ¥æ‰¾è·å¾—HotUpdateç¨‹åºé›†
         Assembly hotUpdateAss = System.AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "HotUpdate");
 #endif
-        //Ìø×ª³¡¾°
+        //è·³è½¬åœºæ™¯
         Addressables.LoadSceneAsync(mainScenePath, LoadSceneMode.Single).Completed += OnSceneLoaded;
     }
 
@@ -76,7 +76,7 @@ public class HotUpdateStarter : MonoBehaviour
         {
             loadingText.gameObject.SetActive(true);
             nowUpdatePercent = Mathf.Lerp(nowUpdatePercent, targetUpdatepercent, 0.2f);
-            loadingText.text = "¸üĞÂÖĞ:" + nowUpdatePercent.ToString("0") + "%";
+            loadingText.text = "æ›´æ–°ä¸­:" + nowUpdatePercent.ToString("0") + "%";
         }
         else
         {
@@ -84,16 +84,16 @@ public class HotUpdateStarter : MonoBehaviour
         }
     }
 
-    // ³¡¾°¼ÓÔØÍê³ÉºóµÄ»Øµ÷
+    // åœºæ™¯åŠ è½½å®Œæˆåçš„å›è°ƒ
     private void OnSceneLoaded(AsyncOperationHandle<SceneInstance> obj)
     {
         if (obj.Status == AsyncOperationStatus.Succeeded)
         {
-            Debug.Log($"³¡¾° {mainScenePath} ¼ÓÔØ³É¹¦£¡");
+            Debug.Log($"åœºæ™¯ {mainScenePath} åŠ è½½æˆåŠŸï¼");
         }
         else
         {
-            Debug.LogError($"³¡¾° {mainScenePath} ¼ÓÔØÊ§°Ü£¡");
+            Debug.LogError($"åœºæ™¯ {mainScenePath} åŠ è½½å¤±è´¥ï¼");
         }
     }
 
@@ -111,18 +111,18 @@ public class HotUpdateStarter : MonoBehaviour
 
     async Task<bool> CheckHotUpdate()
     {
-        //Èç¹ûÈÈ¸üÎÄ¼ş¼Ğ²»´æÔÚ»òÕßÎª¿Õ£¬ÓÖ»òÕßÎÄ¼ş¼ĞÄÚÓĞÕıÔÚÈÈ¸ü±êÖ¾ÎÄ¼ş£¨ËµÃ÷ÈÈ¸üÔøÖĞ¶Ï£©£¬Ôò×ßÍêÕûÈÈ¸üÁ÷³Ì
+        //å¦‚æœçƒ­æ›´æ–‡ä»¶å¤¹ä¸å­˜åœ¨æˆ–è€…ä¸ºç©ºï¼Œåˆæˆ–è€…æ–‡ä»¶å¤¹å†…æœ‰æ­£åœ¨çƒ­æ›´æ ‡å¿—æ–‡ä»¶ï¼ˆè¯´æ˜çƒ­æ›´æ›¾ä¸­æ–­ï¼‰ï¼Œåˆ™èµ°å®Œæ•´çƒ­æ›´æµç¨‹
         if (IsFolderEmpty(HotUpdateDataPath) || File.Exists(Path.Combine(HotUpdateDataPath, "Update.flag")))
         {
             StartCoroutine(FullUpdateRoutine());
             return true;
         }
 
-        //×ßÏÂÈ¥£¬ËµÃ÷ÈÈ¸üÊı¾İÍêÕû£¬µ«ÓĞ¿ÉÄÜÊÇ¾ÉµÄÈÈ¸üÊı¾İ 
+        //èµ°ä¸‹å»ï¼Œè¯´æ˜çƒ­æ›´æ•°æ®å®Œæ•´ï¼Œä½†æœ‰å¯èƒ½æ˜¯æ—§çš„çƒ­æ›´æ•°æ® 
         bool isDllOld = false;
         bool isBundleOld = false;
 
-        //È·ÈÏdllÊÇ·ñĞèÒª¸üĞÂ
+        //ç¡®è®¤dllæ˜¯å¦éœ€è¦æ›´æ–°
         string nowDllHash = ReadLocalTxt("HotUpdate.hash");
         string serverDllHash = "";
         StartCoroutine(ReadNetTxt(HotUpdateDownLoadUrlHead + "HotUpdate.hash", (hash) =>
@@ -139,7 +139,7 @@ public class HotUpdateStarter : MonoBehaviour
         {
             isDllOld = true;
         }
-        //È·ÈÏboundleÊÇ·ñĞèÒª¸üĞÂ
+        //ç¡®è®¤boundleæ˜¯å¦éœ€è¦æ›´æ–°
         string nowBoundleHash = ReadLocalTxt($"catalog_{Application.version}.hash");
         string serverBoundleHash = "";
         StartCoroutine(ReadNetTxt(HotUpdateDownLoadUrlHead + $"catalog_{Application.version}.hash", (hash) => { serverBoundleHash = hash; }));
@@ -153,12 +153,12 @@ public class HotUpdateStarter : MonoBehaviour
         {
             isBundleOld = true;
         }
-        //Èç¹ûdllºÍbundle¶¼ÊÇ×îĞÂµÄ£¬Ôò²»ĞèÒªÈÈ¸ü
+        //å¦‚æœdllå’Œbundleéƒ½æ˜¯æœ€æ–°çš„ï¼Œåˆ™ä¸éœ€è¦çƒ­æ›´
         if (isDllOld == false && isBundleOld == false)
         {
             return false;
         }
-        else//·ñÕß½øÈëÑ¡ÔñĞÔ¸üĞÂ
+        else//å¦è€…è¿›å…¥é€‰æ‹©æ€§æ›´æ–°
         {
             StartCoroutine(SelectUpdateRoutine(isDllOld, isBundleOld));
             return true;
@@ -172,7 +172,7 @@ public class HotUpdateStarter : MonoBehaviour
             DeleteAllFilesAndFolders(HotUpdateDataPath);
             CreateUpdateFlagFile(HotUpdateDataPath);
 
-            //ÍêÕûÈÈ¸üÁ÷³Ì
+            //å®Œæ•´çƒ­æ›´æµç¨‹
             yield return DownloadFile(HotUpdateDownLoadUrlHead + "HotUpdate.dll", Path.Combine(HotUpdateDataPath, "HotUpdate.dll"));
             targetUpdatepercent = 20;
             yield return DownloadFile(HotUpdateDownLoadUrlHead + "HotUpdate.hash", Path.Combine(HotUpdateDataPath, "HotUpdate.hash"));
@@ -237,7 +237,7 @@ public class HotUpdateStarter : MonoBehaviour
                     if (!existsBoundleName.Contains(item))
                     {
                         existsBoundleName.Add(item);
-                        //ÏÂÔØ²»´æÔÚµÄboundle,²»ÖØ¸´ÏÂÔØÍ¬hashµÄboundle
+                        //ä¸‹è½½ä¸å­˜åœ¨çš„boundle,ä¸é‡å¤ä¸‹è½½åŒhashçš„boundle
                         yield return DownloadFile(HotUpdateDownLoadUrlHead + item, Path.Combine(HotUpdateDataPath, item));
                     }
                 }
@@ -286,7 +286,7 @@ public class HotUpdateStarter : MonoBehaviour
         }
         else
         {
-            Debug.LogError("¸üĞÂÊ§°Ü£¬±¾µØÎÄ¼ş²»´æÔÚ: " + filePath);
+            Debug.LogError("æ›´æ–°å¤±è´¥ï¼Œæœ¬åœ°æ–‡ä»¶ä¸å­˜åœ¨: " + filePath);
             DeleteAllFilesAndFolders(HotUpdateDataPath);
             return string.Empty;
         }
@@ -294,34 +294,34 @@ public class HotUpdateStarter : MonoBehaviour
 
     bool IsFolderEmpty(string path)
     {
-        // ¼ì²éÄ¿Â¼ÊÇ·ñ´æÔÚ
+        // æ£€æŸ¥ç›®å½•æ˜¯å¦å­˜åœ¨
         if (!Directory.Exists(path))
         {
-            //Èç¹ûÃ»ÓĞÈÈ¸üÄ¿Â¼£¬Ôò´´½¨
+            //å¦‚æœæ²¡æœ‰çƒ­æ›´ç›®å½•ï¼Œåˆ™åˆ›å»º
             Directory.CreateDirectory(path);
         }
 
-        // »ñÈ¡Ä¿Â¼ÏÂËùÓĞÎÄ¼şºÍ×ÓÄ¿Â¼
+        // è·å–ç›®å½•ä¸‹æ‰€æœ‰æ–‡ä»¶å’Œå­ç›®å½•
         string[] files = Directory.GetFiles(path);
         string[] directories = Directory.GetDirectories(path);
 
-        // Èç¹ûÃ»ÓĞÎÄ¼şÇÒÃ»ÓĞ×ÓÄ¿Â¼£¬ËµÃ÷ÎÄ¼ş¼ĞÎª¿Õ
+        // å¦‚æœæ²¡æœ‰æ–‡ä»¶ä¸”æ²¡æœ‰å­ç›®å½•ï¼Œè¯´æ˜æ–‡ä»¶å¤¹ä¸ºç©º
         return files.Length == 0 && directories.Length == 0;
     }
 
     void CreateUpdateFlagFile(string path)
     {
-        // ¼ì²éÖ¸¶¨µÄÄ¿Â¼ÊÇ·ñ´æÔÚ
+        // æ£€æŸ¥æŒ‡å®šçš„ç›®å½•æ˜¯å¦å­˜åœ¨
         if (!Directory.Exists(path))
         {
             Debug.LogError("Directory does not exist: " + path);
             return;
         }
 
-        // ´´½¨ UpdateFlag ÎÄ¼şµÄÍêÕûÂ·¾¶
+        // åˆ›å»º UpdateFlag æ–‡ä»¶çš„å®Œæ•´è·¯å¾„
         string flagFilePath = Path.Combine(path, "Update.flag");
 
-        // ¼ì²éÎÄ¼şÊÇ·ñÒÑ´æÔÚ
+        // æ£€æŸ¥æ–‡ä»¶æ˜¯å¦å·²å­˜åœ¨
         if (File.Exists(flagFilePath))
         {
             Debug.Log("UpdateFlag file already exists.");
@@ -330,7 +330,7 @@ public class HotUpdateStarter : MonoBehaviour
         {
             try
             {
-                // ´´½¨Ò»¸ö¿ÕÎÄ¼ş
+                // åˆ›å»ºä¸€ä¸ªç©ºæ–‡ä»¶
                 File.Create(flagFilePath).Dispose();
                 Debug.Log("UpdateFlag file created successfully at: " + flagFilePath);
             }
@@ -344,14 +344,14 @@ public class HotUpdateStarter : MonoBehaviour
     void DeleteAllFilesAndFolders(string path)
     {
 
-        //ÏÈ¼ì²éµ±Ç°Æ½Ì¨µÄÈÈ¸üÄ¿Â¼ÊÇ·ñÓĞÎÄ¼ş¼Ğ£¬Ã»ÓĞÔò´´½¨
+        //å…ˆæ£€æŸ¥å½“å‰å¹³å°çš„çƒ­æ›´ç›®å½•æ˜¯å¦æœ‰æ–‡ä»¶å¤¹ï¼Œæ²¡æœ‰åˆ™åˆ›å»º
         if (!Directory.Exists(path))
         {
-            //Èç¹ûÃ»ÓĞÈÈ¸üÄ¿Â¼£¬Ôò´´½¨
+            //å¦‚æœæ²¡æœ‰çƒ­æ›´ç›®å½•ï¼Œåˆ™åˆ›å»º
             Directory.CreateDirectory(path);
         }
 
-        // É¾³ıÎÄ¼ş¼ĞÏÂµÄËùÓĞÎÄ¼ş
+        // åˆ é™¤æ–‡ä»¶å¤¹ä¸‹çš„æ‰€æœ‰æ–‡ä»¶
         string[] files = Directory.GetFiles(path);
         foreach (string file in files)
         {
@@ -368,13 +368,13 @@ public class HotUpdateStarter : MonoBehaviour
             }
         }
 
-        // É¾³ıÎÄ¼ş¼ĞÏÂµÄËùÓĞ×ÓÎÄ¼ş¼Ğ
+        // åˆ é™¤æ–‡ä»¶å¤¹ä¸‹çš„æ‰€æœ‰å­æ–‡ä»¶å¤¹
         string[] directories = Directory.GetDirectories(path);
         foreach (string directory in directories)
         {
             try
             {
-                DeleteAllFilesAndFolders(directory); // µİ¹éÉ¾³ı×ÓÎÄ¼ş¼ĞºÍÎÄ¼ş
+                DeleteAllFilesAndFolders(directory); // é€’å½’åˆ é™¤å­æ–‡ä»¶å¤¹å’Œæ–‡ä»¶
                 Directory.Delete(directory);
                 Debug.Log($"Deleted folder: {directory}");
             }
@@ -386,7 +386,7 @@ public class HotUpdateStarter : MonoBehaviour
             }
         }
 
-        // É¾³ı¿ÕÎÄ¼ş¼Ğ±¾Éí
+        // åˆ é™¤ç©ºæ–‡ä»¶å¤¹æœ¬èº«
         //try
         //{
         //    Directory.Delete(path);
@@ -401,68 +401,68 @@ public class HotUpdateStarter : MonoBehaviour
 
     }
 
-    // ÏÂÔØÎÄ¼ş²¢±£´æµ½Ö¸¶¨ÎÄ¼ş¼Ğ
+    // ä¸‹è½½æ–‡ä»¶å¹¶ä¿å­˜åˆ°æŒ‡å®šæ–‡ä»¶å¤¹
     IEnumerator DownloadFile(string fileUrl, string saveFilePath)
     {
-        // ´´½¨Ò»¸ö UnityWebRequest À´ÏÂÔØÎÄ¼ş
+        // åˆ›å»ºä¸€ä¸ª UnityWebRequest æ¥ä¸‹è½½æ–‡ä»¶
         UnityWebRequest request = UnityWebRequest.Get(fileUrl);
 
-        // ·¢ËÍÇëÇó²¢µÈ´ıÏìÓ¦
+        // å‘é€è¯·æ±‚å¹¶ç­‰å¾…å“åº”
         yield return request.SendWebRequest();
 
-        // ¼ì²éÊÇ·ñÓĞ´íÎó
+        // æ£€æŸ¥æ˜¯å¦æœ‰é”™è¯¯
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("ÏÂÔØÎÄ¼şÊ§°Ü: " + fileUrl +"------------------"+ request.error);
+            Debug.LogError("ä¸‹è½½æ–‡ä»¶å¤±è´¥: " + fileUrl +"------------------"+ request.error);
             Destroy(this);
         }
         else
         {
-            // È·±£Ä¿±êÎÄ¼ş¼Ğ´æÔÚ
+            // ç¡®ä¿ç›®æ ‡æ–‡ä»¶å¤¹å­˜åœ¨
             string directory = Path.GetDirectoryName(saveFilePath);
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
-            // ½«ÏÂÔØµÄÊı¾İ±£´æµ½±¾µØÎÄ¼ş
+            // å°†ä¸‹è½½çš„æ•°æ®ä¿å­˜åˆ°æœ¬åœ°æ–‡ä»¶
             File.WriteAllBytes(saveFilePath, request.downloadHandler.data);
-            Debug.Log("ÎÄ¼şÒÑ±£´æ: " + saveFilePath);
+            Debug.Log("æ–‡ä»¶å·²ä¿å­˜: " + saveFilePath);
         }
     }
 
 
-    // ÏÂÔØÎÄ±¾ÎÄ¼ş²¢¶ÁÈ¡ÄÚÈİ
+    // ä¸‹è½½æ–‡æœ¬æ–‡ä»¶å¹¶è¯»å–å†…å®¹
     IEnumerator ReadNetTxt(string fileUrl, Action<string> onLoadOver = null)
     {
-        // ´´½¨ UnityWebRequest À´»ñÈ¡ÎÄ±¾ÎÄ¼ş
+        // åˆ›å»º UnityWebRequest æ¥è·å–æ–‡æœ¬æ–‡ä»¶
         UnityWebRequest request = UnityWebRequest.Get(fileUrl);
 
-        // ·¢ËÍÇëÇó²¢µÈ´ıÏìÓ¦
+        // å‘é€è¯·æ±‚å¹¶ç­‰å¾…å“åº”
         yield return request.SendWebRequest();
 
-        // ¼ì²éÇëÇóÊÇ·ñ³É¹¦
+        // æ£€æŸ¥è¯·æ±‚æ˜¯å¦æˆåŠŸ
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("ÏÂÔØÎÄ¼şÊ§°Ü: " + fileUrl + "------------------" + request.error);
+            Debug.LogError("ä¸‹è½½æ–‡ä»¶å¤±è´¥: " + fileUrl + "------------------" + request.error);
             Destroy(this);
         }
         else
         {
-            // »ñÈ¡ÎÄ¼şÄÚÈİ£¨×÷ÎªÎÄ±¾×Ö·û´®£©
+            // è·å–æ–‡ä»¶å†…å®¹ï¼ˆä½œä¸ºæ–‡æœ¬å­—ç¬¦ä¸²ï¼‰
             string fileContents = request.downloadHandler.text;
 
             onLoadOver?.Invoke(request.downloadHandler.text);
-            // Êä³öÎÄ¼şÄÚÈİµ½¿ØÖÆÌ¨
-            Debug.Log("ÎÄ¼şÄÚÈİ:\n" + fileContents);
+            // è¾“å‡ºæ–‡ä»¶å†…å®¹åˆ°æ§åˆ¶å°
+            Debug.Log("æ–‡ä»¶å†…å®¹:\n" + fileContents);
         }
     }
 
 
     /// <summary>
-    /// »ñÈ¡ÔËĞĞÊ±µÄ¹¹½¨Ä¿±êÃû³Æ¡£
+    /// è·å–è¿è¡Œæ—¶çš„æ„å»ºç›®æ ‡åç§°ã€‚
     /// </summary>
-    /// <returns>ÀàËÆ EditorUserBuildSettings.activeBuildTarget.ToString() µÄ×Ö·û´®Ãû³Æ¡£</returns>
+    /// <returns>ç±»ä¼¼ EditorUserBuildSettings.activeBuildTarget.ToString() çš„å­—ç¬¦ä¸²åç§°ã€‚</returns>
     public static string GetHotDataFolderName()
     {
         switch (Application.platform)
