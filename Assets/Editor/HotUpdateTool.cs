@@ -183,6 +183,14 @@ public class HotUpdateTool
             {
                 Debug.LogError("文件上传失败: " + filePath + "-------------" + request.error);
             }
+            // 释放相关资源
+            request.uploadHandler?.Dispose();  // Dispose of UploadHandlerRaw
+            request.downloadHandler?.Dispose();  // Dispose of DownloadHandlerBuffer
+            request.Dispose();  // Dispose of UnityWebRequest itself
+
+            formData.Clear();  // 清空 List<byte>
+            formData = null;  // 手动将引用设为 null
+            fileData = null;  // 手动将文件数据引用设为 null
         }
 
 
