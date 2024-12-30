@@ -16,15 +16,15 @@ public class HotUpdateTool
 {
     private static string serverUrlHead = "http://127.0.0.1:637";
 
-    [MenuItem("×ÊÔ´²Ù×÷/¸üĞÂËùÓĞ", priority = 100)]
+    [MenuItem("èµ„æºæ“ä½œ/æ›´æ–°æ‰€æœ‰", priority = 100)]
     public static async void UpdateAll()
     {
         await UpdateHotUpdateAAbundle();
         UpdateHotUpdateDll();
-        Debug.Log("ËùÓĞÈÈ¸ü×ÊÔ´¸üĞÂÍê±Ï");
+        Debug.Log("æ‰€æœ‰çƒ­æ›´èµ„æºæ›´æ–°å®Œæ¯•");
     }
 
-    [MenuItem("×ÊÔ´²Ù×÷/¸üĞÂÈÈ¸ü´úÂë", priority = 102)]
+    [MenuItem("èµ„æºæ“ä½œ/æ›´æ–°çƒ­æ›´ä»£ç ", priority = 102)]
     public static void UpdateHotUpdateDll()
     {
         CompileDllCommand.CompileDllActiveBuildTarget();
@@ -32,7 +32,7 @@ public class HotUpdateTool
         string targetDllFilePath = GetTargetDllPath();
         bool copyOk = CopyFile(dllFilePath, targetDllFilePath);
         GenerateFileHash(targetDllFilePath, "HotUpdate.hash");
-        Debug.Log("ÈÈ¸üdll¸üĞÂÍê³É");
+        Debug.Log("çƒ­æ›´dllæ›´æ–°å®Œæˆ");
 
         string GetOringnalDllPath()
         {
@@ -59,7 +59,7 @@ public class HotUpdateTool
         }
     }
 
-    [MenuItem("×ÊÔ´²Ù×÷/¸üĞÂÈÈ¸ü×ÊÔ´", priority = 101)]
+    [MenuItem("èµ„æºæ“ä½œ/æ›´æ–°çƒ­æ›´èµ„æº", priority = 101)]
     public static async Task UpdateHotUpdateAAbundle()
     {
         //ResourceEditor.SetAllAllAAPrefabName();
@@ -93,7 +93,7 @@ public class HotUpdateTool
                 }
             }
 
-            Debug.Log("AA×ÊÔ´¸üĞÂÍê³É");
+            Debug.Log("AAèµ„æºæ›´æ–°å®Œæˆ");
 
         }
 
@@ -108,7 +108,7 @@ public class HotUpdateTool
     }
 
 
-    [MenuItem("×ÊÔ´²Ù×÷/ÉÏ´«ËùÓĞµ½·şÎñÆ÷", priority = 103)]
+    [MenuItem("èµ„æºæ“ä½œ/ä¸Šä¼ æ‰€æœ‰åˆ°æœåŠ¡å™¨", priority = 103)]
     public async static void UpLoadAllToServer()
     {
         string[] filePath = Directory.GetFiles(GetNowPlatformHotUpdateFolderPath());
@@ -125,63 +125,63 @@ public class HotUpdateTool
             }
         }
 
-        Debug.Log($"{EditorUserBuildSettings.activeBuildTarget.ToString()}Æ½Ì¨ËùÓĞÈÈ¸ü×ÊÔ´ÉÏ´«Íê±Ï");
+        Debug.Log($"{EditorUserBuildSettings.activeBuildTarget.ToString()}å¹³å°æ‰€æœ‰çƒ­æ›´èµ„æºä¸Šä¼ å®Œæ¯•");
 
         async Task UploadFileAsync(string filePath, bool clearFolder = false)
         {
-            // ¼ì²éÎÄ¼şÊÇ·ñ´æÔÚ
+            // æ£€æŸ¥æ–‡ä»¶æ˜¯å¦å­˜åœ¨
             if (!System.IO.File.Exists(filePath))
             {
-                Debug.LogError("ÎÄ¼ş²»´æÔÚ: " + filePath);
+                Debug.LogError("æ–‡ä»¶ä¸å­˜åœ¨: " + filePath);
                 return;
             }
 
-            // ¶ÁÈ¡ÎÄ¼şÄÚÈİ
+            // è¯»å–æ–‡ä»¶å†…å®¹
             byte[] fileData = System.IO.File.ReadAllBytes(filePath);
 
             string clearFolderTail = clearFolder ? "&clearFolder=true" : "";
-            // ´´½¨ÉÏ´«ÇëÇó
+            // åˆ›å»ºä¸Šä¼ è¯·æ±‚
             UnityWebRequest request = new UnityWebRequest(GetUpLoadUrl() + clearFolderTail, UnityWebRequest.kHttpVerbPOST);
 
-            // Éú³ÉÇëÇó±ß½ç
+            // ç”Ÿæˆè¯·æ±‚è¾¹ç•Œ
             string boundary = "----UnityFormBoundary";
             byte[] boundaryBytes = Encoding.ASCII.GetBytes("\r\n--" + boundary + "\r\n");
 
-            // ¹¹Ôì±íµ¥Êı¾İ
+            // æ„é€ è¡¨å•æ•°æ®
             byte[] fileNameBytes = Encoding.UTF8.GetBytes($"Content-Disposition: form-data; name=\"file\"; filename=\"{Path.GetFileName(filePath)}\"\r\n");
             byte[] fileHeaderBytes = Encoding.UTF8.GetBytes("Content-Type: application/octet-stream\r\n\r\n");
 
-            // ¹¹ÔìÍêÕûµÄ multipart Êı¾İ
+            // æ„é€ å®Œæ•´çš„ multipart æ•°æ®
             List<byte> formData = new List<byte>();
             formData.AddRange(boundaryBytes);
             formData.AddRange(fileNameBytes);
             formData.AddRange(fileHeaderBytes);
-            formData.AddRange(fileData); // Ìí¼ÓÎÄ¼şÊı¾İ
-            formData.AddRange(Encoding.ASCII.GetBytes("\r\n--" + boundary + "--\r\n")); // ½áÊø±ß½ç
+            formData.AddRange(fileData); // æ·»åŠ æ–‡ä»¶æ•°æ®
+            formData.AddRange(Encoding.ASCII.GetBytes("\r\n--" + boundary + "--\r\n")); // ç»“æŸè¾¹ç•Œ
 
-            // ÉèÖÃÉÏ´«´¦ÀíÆ÷
+            // è®¾ç½®ä¸Šä¼ å¤„ç†å™¨
             request.uploadHandler = new UploadHandlerRaw(formData.ToArray());
             request.downloadHandler = new DownloadHandlerBuffer();
 
-            // ÉèÖÃ Content-Type Îª multipart/form-data£¬²¢Ìí¼ÓÎÄ¼ş×Ö¶Î
+            // è®¾ç½® Content-Type ä¸º multipart/form-dataï¼Œå¹¶æ·»åŠ æ–‡ä»¶å­—æ®µ
             request.SetRequestHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
 
-            // ·¢ËÍÇëÇó²¢µÈ´ıÏìÓ¦
+            // å‘é€è¯·æ±‚å¹¶ç­‰å¾…å“åº”
             var operation = request.SendWebRequest();
 
             while (!operation.isDone)
             {
-                await Task.Yield(); // Òì²½µÈ´ıÍê³É
+                await Task.Yield(); // å¼‚æ­¥ç­‰å¾…å®Œæˆ
             }
 
-            // ¼ì²é½á¹û
+            // æ£€æŸ¥ç»“æœ
             if (request.result == UnityWebRequest.Result.Success)
             {
-                Debug.Log("ÎÄ¼şÉÏ´«³É¹¦: " + filePath);
+                Debug.Log("æ–‡ä»¶ä¸Šä¼ æˆåŠŸ: " + filePath);
             }
             else
             {
-                Debug.LogError("ÎÄ¼şÉÏ´«Ê§°Ü: "+ filePath +"-------------"+ request.error);
+                Debug.LogError("æ–‡ä»¶ä¸Šä¼ å¤±è´¥: "+ filePath +"-------------"+ request.error);
             }
         }
 
@@ -211,17 +211,17 @@ public class HotUpdateTool
 
     private static string GetNowPlatformHotUpdateFolderPath()
     {
-        // »ñÈ¡Ä¿±êÄ¿Â¼Â·¾¶
+        // è·å–ç›®æ ‡ç›®å½•è·¯å¾„
         string hotUpdateFolderPath = Application.persistentDataPath;
         hotUpdateFolderPath = hotUpdateFolderPath + "/HotUpdateData/" + EditorUserBuildSettings.activeBuildTarget.ToString();
 
-        // Èç¹ûÄ¿Â¼²»´æÔÚ£¬Ôò´´½¨¸ÃÄ¿Â¼
+        // å¦‚æœç›®å½•ä¸å­˜åœ¨ï¼Œåˆ™åˆ›å»ºè¯¥ç›®å½•
         if (!Directory.Exists(hotUpdateFolderPath))
         {
             Directory.CreateDirectory(hotUpdateFolderPath);
         }
 
-        // ·µ»ØÎÄ¼ş¼ĞÂ·¾¶
+        // è¿”å›æ–‡ä»¶å¤¹è·¯å¾„
         return hotUpdateFolderPath;
     }
 
@@ -231,10 +231,10 @@ public class HotUpdateTool
         try
         {
             List<string> fileNames = new List<string>();
-            // ¶ÁÈ¡ JSON ÎÄ¼ş
+            // è¯»å– JSON æ–‡ä»¶
             var json = await File.ReadAllTextAsync(filePath);
 
-            // Ê¹ÓÃ System.Text.Json ·´ĞòÁĞ»¯ JSON
+            // ä½¿ç”¨ System.Text.Json ååºåˆ—åŒ– JSON
             var catalogData = JsonConvert.DeserializeObject<AAcatalogData>(json);
 
             foreach (string item in catalogData.m_InternalIds)
@@ -259,47 +259,47 @@ public class HotUpdateTool
 
 
     /// <summary>
-    /// ¸´ÖÆÎÄ¼şµÄº¯Êı¡£
+    /// å¤åˆ¶æ–‡ä»¶çš„å‡½æ•°ã€‚
     /// </summary>
-    /// <param name="sourceFilePath">Ô´ÎÄ¼şµÄÂ·¾¶¡£</param>
-    /// <param name="destinationFilePath">Ä¿±êÎÄ¼şµÄÂ·¾¶¡£</param>
-    /// <param name="overwrite">Èç¹ûÄ¿±êÎÄ¼şÒÑ´æÔÚ£¬ÊÇ·ñ¸²¸Ç¡£</param>
-    /// <returns>ÎÄ¼ş¸´ÖÆ³É¹¦·µ»Ø true£¬·ñÔò·µ»Ø false¡£</returns>
+    /// <param name="sourceFilePath">æºæ–‡ä»¶çš„è·¯å¾„ã€‚</param>
+    /// <param name="destinationFilePath">ç›®æ ‡æ–‡ä»¶çš„è·¯å¾„ã€‚</param>
+    /// <param name="overwrite">å¦‚æœç›®æ ‡æ–‡ä»¶å·²å­˜åœ¨ï¼Œæ˜¯å¦è¦†ç›–ã€‚</param>
+    /// <returns>æ–‡ä»¶å¤åˆ¶æˆåŠŸè¿”å› trueï¼Œå¦åˆ™è¿”å› falseã€‚</returns>
     public static bool CopyFile(string sourceFilePath, string destinationFilePath, bool overwrite = true)
     {
         try
         {
-            // ¼ì²éÔ´ÎÄ¼şÊÇ·ñ´æÔÚ
+            // æ£€æŸ¥æºæ–‡ä»¶æ˜¯å¦å­˜åœ¨
             if (!File.Exists(sourceFilePath))
             {
-                Debug.LogError($"Ô´ÎÄ¼ş²»´æÔÚ£º{sourceFilePath}");
+                Debug.LogError($"æºæ–‡ä»¶ä¸å­˜åœ¨ï¼š{sourceFilePath}");
                 return false;
             }
 
-            // ¼ì²é²¢´´½¨Ä¿±êÎÄ¼ş¼Ğ
+            // æ£€æŸ¥å¹¶åˆ›å»ºç›®æ ‡æ–‡ä»¶å¤¹
             string destinationDirectory = Path.GetDirectoryName(destinationFilePath);
             if (!Directory.Exists(destinationDirectory))
             {
-                Debug.Log($"Ä¿±êÎÄ¼ş¼Ğ²»´æÔÚ£¬ÕıÔÚ´´½¨£º{destinationDirectory}");
+                Debug.Log($"ç›®æ ‡æ–‡ä»¶å¤¹ä¸å­˜åœ¨ï¼Œæ­£åœ¨åˆ›å»ºï¼š{destinationDirectory}");
                 Directory.CreateDirectory(destinationDirectory);
             }
 
-            // Ö´ĞĞÎÄ¼ş¸´ÖÆ
+            // æ‰§è¡Œæ–‡ä»¶å¤åˆ¶
             File.Copy(sourceFilePath, destinationFilePath, overwrite);
-            Debug.Log($"ÎÄ¼ş¸´ÖÆ³É¹¦£º´Ó {sourceFilePath} µ½ {destinationFilePath}");
+            Debug.Log($"æ–‡ä»¶å¤åˆ¶æˆåŠŸï¼šä» {sourceFilePath} åˆ° {destinationFilePath}");
             return true;
         }
         catch (UnauthorizedAccessException ex)
         {
-            Debug.LogError($"·ÃÎÊ±»¾Ü¾ø£º{ex.Message}");
+            Debug.LogError($"è®¿é—®è¢«æ‹’ç»ï¼š{ex.Message}");
         }
         catch (IOException ex)
         {
-            Debug.LogError($"ÎÄ¼ş²Ù×÷´íÎó£º{ex.Message}");
+            Debug.LogError($"æ–‡ä»¶æ“ä½œé”™è¯¯ï¼š{ex.Message}");
         }
         catch (Exception ex)
         {
-            Debug.LogError($"·¢Éú´íÎó£º{ex.Message}");
+            Debug.LogError($"å‘ç”Ÿé”™è¯¯ï¼š{ex.Message}");
         }
 
         return false;
@@ -307,45 +307,45 @@ public class HotUpdateTool
 
 
     /// <summary>
-    /// »ñÈ¡ÎÄ¼şµÄ¹şÏ£Öµ²¢Éú³É HotUpdateDll.hash ÎÄ¼ş¡£
+    /// è·å–æ–‡ä»¶çš„å“ˆå¸Œå€¼å¹¶ç”Ÿæˆ HotUpdateDll.hash æ–‡ä»¶ã€‚
     /// </summary>
-    /// <param name="filePath">Òª¼ÆËã¹şÏ£ÖµµÄÎÄ¼şÂ·¾¶¡£</param>
-    /// <returns>²Ù×÷³É¹¦·µ»Ø true£¬·ñÔò·µ»Ø false¡£</returns>
+    /// <param name="filePath">è¦è®¡ç®—å“ˆå¸Œå€¼çš„æ–‡ä»¶è·¯å¾„ã€‚</param>
+    /// <returns>æ“ä½œæˆåŠŸè¿”å› trueï¼Œå¦åˆ™è¿”å› falseã€‚</returns>
     public static bool GenerateFileHash(string filePath, string txtName)
     {
         try
         {
-            // ¼ì²éÎÄ¼şÊÇ·ñ´æÔÚ
+            // æ£€æŸ¥æ–‡ä»¶æ˜¯å¦å­˜åœ¨
             if (!File.Exists(filePath))
             {
-                Debug.LogError($"ÎÄ¼ş²»´æÔÚ£º{filePath}");
+                Debug.LogError($"æ–‡ä»¶ä¸å­˜åœ¨ï¼š{filePath}");
                 return false;
             }
 
-            // ¼ÆËãÎÄ¼şµÄ¹şÏ£Öµ
+            // è®¡ç®—æ–‡ä»¶çš„å“ˆå¸Œå€¼
             string hash = GetFileHash(filePath);
 
-            // ¶¨ÒåÊä³öÎÄ¼şÂ·¾¶
+            // å®šä¹‰è¾“å‡ºæ–‡ä»¶è·¯å¾„
             string hashFilePath = Path.Combine(Path.GetDirectoryName(filePath), txtName);
 
-            // ½«¹şÏ£ÖµĞ´ÈëÎÄ¼ş
+            // å°†å“ˆå¸Œå€¼å†™å…¥æ–‡ä»¶
             File.WriteAllText(hashFilePath, hash);
 
-            Debug.Log($"ÎÄ¼ş¹şÏ£ÖµÉú³É³É¹¦£º{hashFilePath}");
+            Debug.Log($"æ–‡ä»¶å“ˆå¸Œå€¼ç”ŸæˆæˆåŠŸï¼š{hashFilePath}");
             return true;
         }
         catch (Exception ex)
         {
-            Debug.LogError($"·¢Éú´íÎó£º{ex.Message}");
+            Debug.LogError($"å‘ç”Ÿé”™è¯¯ï¼š{ex.Message}");
             return false;
         }
     }
 
     /// <summary>
-    /// ¼ÆËãÎÄ¼şµÄ¹şÏ£Öµ£¨SHA256£©¡£
+    /// è®¡ç®—æ–‡ä»¶çš„å“ˆå¸Œå€¼ï¼ˆSHA256ï¼‰ã€‚
     /// </summary>
-    /// <param name="filePath">ÎÄ¼şÂ·¾¶¡£</param>
-    /// <returns>ÎÄ¼şµÄ¹şÏ£Öµ¡£</returns>
+    /// <param name="filePath">æ–‡ä»¶è·¯å¾„ã€‚</param>
+    /// <returns>æ–‡ä»¶çš„å“ˆå¸Œå€¼ã€‚</returns>
     private static string GetFileHash(string filePath)
     {
         using (var sha256 = SHA256.Create())

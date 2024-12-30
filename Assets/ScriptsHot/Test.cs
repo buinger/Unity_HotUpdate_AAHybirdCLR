@@ -7,8 +7,8 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public class Test : MonoBehaviour
 {
 
-    public string prefabAddress; // Ô¤ÖÆ¼şµÄ Addressable µØÖ·
-    private GameObject loadedPrefab; // ¼ÓÔØµÄÔ¤ÖÆ¼şÊµÀı
+    public string prefabAddress; // é¢„åˆ¶ä»¶çš„ Addressable åœ°å€
+    private GameObject loadedPrefab; // åŠ è½½çš„é¢„åˆ¶ä»¶å®ä¾‹
 
 
     // Start is called before the first frame update
@@ -17,21 +17,21 @@ public class Test : MonoBehaviour
         Addressables.LoadAssetAsync<GameObject>(prefabAddress).Completed += OnPrefabLoaded;
     }
 
-    // ´¦Àí¼ÓÔØÍê³ÉµÄ»Øµ÷
+    // å¤„ç†åŠ è½½å®Œæˆçš„å›è°ƒ
     private void OnPrefabLoaded(AsyncOperationHandle<GameObject> obj)
     {
         if (obj.Status == AsyncOperationStatus.Succeeded)
         {
-            Debug.Log($"Ô¤ÖÆ¼ş {prefabAddress} ¼ÓÔØ³É¹¦£¡");
+            Debug.Log($"é¢„åˆ¶ä»¶ {prefabAddress} åŠ è½½æˆåŠŸï¼");
 
-            // ÊµÀı»¯Ô¤ÖÆ¼ş
+            // å®ä¾‹åŒ–é¢„åˆ¶ä»¶
             loadedPrefab = Instantiate(obj.Result);
 
             loadedPrefab.transform.localScale = new Vector3(0.5f,0.5f,0.5f);
         }
         else
         {
-            Debug.LogError($"Ô¤ÖÆ¼ş {prefabAddress} ¼ÓÔØÊ§°Ü£¡");
+            Debug.LogError($"é¢„åˆ¶ä»¶ {prefabAddress} åŠ è½½å¤±è´¥ï¼");
         }
     }
 }
