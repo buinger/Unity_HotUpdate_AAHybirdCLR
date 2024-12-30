@@ -26,7 +26,7 @@ public class HotUpdateStarter : MonoBehaviour
 
     bool isUpdating = false;
     float nowUpdatePercent = 0;
-    float targetUpdatepercent = 100;
+    float targetUpdatepercent = 0;
 
     private string HotUpdateDataPath
     {
