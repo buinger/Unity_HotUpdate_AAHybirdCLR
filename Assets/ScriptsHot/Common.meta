@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/ScriptsHot/Common.meta
 guid: 26d96e72235460c4b844511a6457f70d
+========
+guid: 16b9dc031f67b4fe5ad79c230f75768c
+>>>>>>>> main:com.code-philosophy.hybridclr/Editor/3rds/UnityHook/Plugins.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
