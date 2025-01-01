@@ -27,7 +27,7 @@ public class Test : MonoBehaviour
             // 实例化预制件
             loadedPrefab = Instantiate(obj.Result);
 
-            loadedPrefab.transform.localScale = new Vector3(0.5f,0.5f,0.5f);
+            loadedPrefab.transform.localScale = new Vector3(2f,2f,2f);
         }
         else
         {
