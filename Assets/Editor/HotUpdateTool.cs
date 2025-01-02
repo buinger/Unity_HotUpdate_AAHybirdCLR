@@ -12,10 +12,18 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine.Networking;
 using UnityEditor.AddressableAssets;
+using UnityEngine.AddressableAssets;
 
 public class HotUpdateTool
 {
-    private static string serverUrlHead = "http://127.0.0.1:637";
+    public static string RunTimeFolderPath
+    {
+        get
+        {
+            return Path.Combine(Addressables.RuntimePath, "BuildTarget");
+        }
+    }
+    private static string serverUrlHead = "https://ipet.huanzer.com";
 
     [MenuItem("资源操作/更新所有", priority = 100)]
     public static async void UpdateAll()
@@ -26,9 +34,12 @@ public class HotUpdateTool
     }
 
     [MenuItem("资源操作/更新热更代码", priority = 101)]
-    public static void UpdateHotUpdateDll()
+    public static void UpdateHotUpdateDll(bool isCompile = true)
     {
-        CompileDllCommand.CompileDllActiveBuildTarget();
+        if (isCompile)
+        {
+            CompileDllCommand.CompileDllActiveBuildTarget();
+        }
         string dllFilePath = GetOringnalDllPath();
         string targetDllFilePath = GetTargetDllPath();
         bool copyOk = CopyFile(dllFilePath, targetDllFilePath);
@@ -50,13 +61,9 @@ public class HotUpdateTool
 
         string GetTargetDllPath()
         {
-            //C:/Users/Administrator/AppData/LocalLow/DefaultCompany/HotUpdate
-            //C:\Users\Administrator\AppData\LocalLow\DefaultCompany\HotUpdate\HotUpdateData\StandaloneWindows64
-            string dllTargetPath = Application.persistentDataPath;
-            dllTargetPath = dllTargetPath + "/HotUpdateData/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "/HotUpdate.dll";
+            string dllTargetPath = RunTimeFolderPath + "/HotUpdate.dll";
             Debug.Log(dllTargetPath);
             return dllTargetPath;
-            //C:/Users/Administrator/AppData/LocalLow/DefaultCompany/HotUpdate/HotUpdateData/StandaloneWindows64/HotUpdateDll.dll
         }
     }
 
@@ -93,7 +100,7 @@ public class HotUpdateTool
                     }
                 }
             }
-
+            UpdateHotUpdateDll(false);
             Debug.Log("AA资源更新完成");
 
         }
@@ -102,8 +109,8 @@ public class HotUpdateTool
 
         string GetCatalogPath()
         {
-            string dllTargetPath = Application.persistentDataPath;
-            dllTargetPath = dllTargetPath + "/HotUpdateData/" + EditorUserBuildSettings.activeBuildTarget.ToString() + $"/catalog_{Application.version}.json";
+            // string dllTargetPath = Application.persistentDataPath;
+            string dllTargetPath = RunTimeFolderPath + $"/catalog_{Application.version}.json";
             return dllTargetPath;
         }
     }
@@ -184,6 +191,8 @@ public class HotUpdateTool
             {
                 Debug.LogError("文件上传失败: " + filePath + "-------------" + request.error);
             }
+
+
             // 释放相关资源
             request.uploadHandler?.Dispose();  // Dispose of UploadHandlerRaw
             request.downloadHandler?.Dispose();  // Dispose of DownloadHandlerBuffer
@@ -200,8 +209,10 @@ public class HotUpdateTool
     [MenuItem("资源操作/打开当前平台热更资源文件夹", priority = 109)]
     public static void OpenTargetHotSourceFolder()
     {
-        string pPath = Application.persistentDataPath;
-        string folderPath = pPath + "/HotUpdateData/" + EditorUserBuildSettings.activeBuildTarget.ToString();
+
+        string folderPath = RunTimeFolderPath;
+        folderPath = Application.dataPath.Replace("Assets", "") + folderPath;
+        Debug.Log(folderPath);
         System.Diagnostics.Process.Start(folderPath);
     }
 
@@ -284,8 +295,7 @@ public class HotUpdateTool
                     ifChange = true;
                 }
 
-                string aimPath = path.Replace(Application.persistentDataPath + "/", "");
-
+                string aimPath = path;
                 if (temp.path != aimPath)
                 {
                     temp.path = aimPath;
@@ -316,14 +326,14 @@ public class HotUpdateTool
     private static string GetUpLoadUrl()
     {
         //private static string urlHead = "http://localhost:8080/upload/testFolder?password=123456";
-        string url = serverUrlHead + "/upload/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=123456";
+        string url = serverUrlHead + "/upload/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=qidawei.huanzer.2024";
         return url;
     }
 
     private static string GetDownUrl()
     {
         //private static string urlHead = "http://localhost:8080/upload/testFolder?password=123456";
-        string url = serverUrlHead + "/download/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=123456";
+        string url = serverUrlHead + "/download/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=qidawei.huanzer.2024";
         return url;
     }
 
@@ -331,8 +341,7 @@ public class HotUpdateTool
     private static string GetNowPlatformHotUpdateFolderPath()
     {
         // 获取目标目录路径
-        string hotUpdateFolderPath = Application.persistentDataPath;
-        hotUpdateFolderPath = hotUpdateFolderPath + "/HotUpdateData/" + EditorUserBuildSettings.activeBuildTarget.ToString();
+        string hotUpdateFolderPath = RunTimeFolderPath;
 
         // 如果目录不存在，则创建该目录
         if (!Directory.Exists(hotUpdateFolderPath))
