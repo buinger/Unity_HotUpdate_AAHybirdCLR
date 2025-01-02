@@ -12,8 +12,8 @@
 ### **基础热更环境配置**
 1. PackageManager中导入AA,导入项目根目录文件"com.code-philosophy.hybridclr/package.json"（或者用git的url：https://github.com/focus-creative-games/hybridclr_unity.git） 导入HybirdCLR
 2. 先做初始化，上方工具栏，点击**HybirdCLR/install**安装，然后点击**HybirdCLR/Generate/All**(此操作建议在每次在出工程包前点击)，然后**进入Addressable面板，如果您是重头配置，需要点击，Create Addressable Settings**,确保文件夹AddressableAssetsData和HybridCLRGenerate存在于Assets根目录,然后在Unity-Preferences-Addressables设置中取消勾选 Debug Build Layout，**不然打包aa会报错**（虽然不重要，但是看着糟心）
-3. 接着配置AA的资源包的默认读写路径 ，**把AddressableAssetSettings文件的Profile设为Default**，同时进入Default编辑窗口，找到里面的Local设定，**直接设定为Built-In就行了**，这样就使用aa内部的全平台适配路径了。**（PS：下面的BuildPath和LoadPath是程序打包后资源包的输出路径和程序运行时读取资源包的路径）**
-4. 配置AA的catlog.json(资源包索引文件)和他的hash文件生成位置，在AddressableAssetSettings文件中找到ContentUpdate,**把Build&LoadPaths下拉列表选择Local**（这样catlog.json将会在热更资源打包后，生成到Profile配置的路径中，并且打包的程序运行时也会从这个路径中读取catlog.json。）
+3. 接着配置AA的资源包的默认读写路径 ，**把AddressableAssetSettings文件的Profile设为Default**，同时进入Default编辑窗口，找到里面的Local设定，**直接设定为Built-In就行了**，这样就使用aa内部的全平台适配路径了。**（PS：下面的BuildPath“[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]”和LoadPath“{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]”是程序打包后资源包的输出路径和程序运行时读取资源包的路径）**
+4. 配置AA的catlog.json(资源包索引文件)和他的hash文件生成位置，在AddressableAssetSettings文件中找到ContentUpdate,**把Build&LoadPaths下拉列表选择Local**，确定下方路径预览末尾是BuildTarget文件夹名。（这样catlog.json将会在热更资源打包后，生成到Profile配置的路径中，并且打包的程序运行时也会从这个路径中读取catlog.json。）
 5. 配置好热更资源后，打包热更资源，成功后，点击上方工具栏-资源操作-打开当前平台热更资源文件夹，**将会打开文件夹BuildTarget**，里面是当前平台的热更资源。
 6. 删除BuildTarget文件夹，打包工程可执行文件后，**如果再次生成BuildTarget文件夹**，说明AA插件配置完毕。
 7. 新建**脚本文件夹Assets/ScriptsHot**(所有需要热更的脚本都要放这)，并在此**在目录下右键 Create/Assembly Definition**，创建一个名为**HotUpdate**的程序集模块
