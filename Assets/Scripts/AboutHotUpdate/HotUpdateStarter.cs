@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.Networking;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
@@ -22,17 +23,15 @@ public class HotUpdateStarter : MonoBehaviour
 
     public string mainScenePath; // 场景的 Addressable 地址
     public Text loadingText;
-
-
     bool isUpdating = false;
     float nowUpdatePercent = 0;
     float targetUpdatepercent = 0;
-
+    //{UnityEngine.AddressableAssets.Addressables.RuntimePath}/HotUpdateData/[BuildTarget]
     private string HotUpdateDataPath
     {
         get
         {
-            return Path.Combine(Application.persistentDataPath, "HotUpdateData", GetHotDataFolderName());
+            return Path.Combine(Addressables.RuntimePath, "BuildTarget");
         }
     }
 
@@ -46,19 +45,16 @@ public class HotUpdateStarter : MonoBehaviour
 
 
     // Start is called before the first frame update
-    async void Start()
+    IEnumerator Start()
     {
         Debug.Log($"catalog_{Application.version}.hash");
         // Editor环境下，HotUpdate.dll.bytes已经被自动加载，不需要加载，重复加载反而会出问题。
 #if !UNITY_EDITOR
         if (ifCheckUpdate)
         {
-            isUpdating = await CheckHotUpdate();
-            if (isUpdating)
-            {
-                return;
-            }
+            yield return CheckHotUpdate();          
         }
+        //yield return ReloadCatalog();
         Assembly hotUpdateAss = Assembly.Load(File.ReadAllBytes(GetTargetDllPath()));
 #else
 
@@ -67,6 +63,7 @@ public class HotUpdateStarter : MonoBehaviour
 #endif
         //跳转场景
         Addressables.LoadSceneAsync(mainScenePath, LoadSceneMode.Single).Completed += OnSceneLoaded;
+        yield return null;
     }
 
 
@@ -76,13 +73,40 @@ public class HotUpdateStarter : MonoBehaviour
         {
             loadingText.gameObject.SetActive(true);
             nowUpdatePercent = Mathf.Lerp(nowUpdatePercent, targetUpdatepercent, 0.2f);
-            loadingText.text = "更新中:" + nowUpdatePercent.ToString("0") + "%";
+            loadingText.text = "Ipet更新中:" + nowUpdatePercent.ToString("0") + "%";
         }
         else
         {
             loadingText.gameObject.SetActive(false);
         }
     }
+
+    // IEnumerator ReloadCatalog()
+    // {
+    //     // 如果已经有一个加载操作在进行，先清理它
+    //     if (loadCatalogHandle.IsValid())
+    //     {
+    //         Addressables.Release(loadCatalogHandle);
+    //     }
+    //     // 卸载之前加载的资源
+    //     Addressables.ClearResourceLocators();
+    //     string cataLogPath = Path.Combine(HotUpdateDataPath, $"catalog_{Application.version}.json");
+    //     Addressables.LoadContentCatalogAsync(Path.Combine(HotUpdateDataPath, $"catalog_{Application.version}.json"), false).Completed += (handle) =>
+    //     {
+    //         Debug.Log("读取加载catalog完成");
+    //     };
+    //     // 异步加载新的 catalog
+    //     loadCatalogHandle = Addressables.LoadContentCatalogAsync(cataLogPath);
+    //     yield return loadCatalogHandle;
+    //     if (loadCatalogHandle.Status == AsyncOperationStatus.Succeeded)
+    //     {
+    //         Debug.Log("新资aa源加载完毕");
+    //     }
+    //     else
+    //     {
+    //         Debug.LogError("aa资源加载失败");
+    //     }
+    // }
 
     // 场景加载完成后的回调
     private void OnSceneLoaded(AsyncOperationHandle<SceneInstance> obj)
@@ -109,13 +133,13 @@ public class HotUpdateStarter : MonoBehaviour
 
 
 
-    async Task<bool> CheckHotUpdate()
+    IEnumerator CheckHotUpdate()
     {
         //如果热更文件夹不存在或者为空，又或者文件夹内有正在热更标志文件（说明热更曾中断），则走完整热更流程
         if (IsFolderEmpty(HotUpdateDataPath) || File.Exists(Path.Combine(HotUpdateDataPath, "Update.flag")))
         {
-            StartCoroutine(FullUpdateRoutine());
-            return true;
+            yield return StartCoroutine(FullUpdateRoutine());
+            yield break;
         }
 
         //走下去，说明热更数据完整，但有可能是旧的热更数据 
@@ -125,15 +149,10 @@ public class HotUpdateStarter : MonoBehaviour
         //确认dll是否需要更新
         string nowDllHash = ReadLocalTxt("HotUpdate.hash");
         string serverDllHash = "";
-        StartCoroutine(ReadNetTxt(HotUpdateDownLoadUrlHead + "HotUpdate.hash", (hash) =>
-        {
-            serverDllHash = hash;
-        }));
-
-        while (serverDllHash == "")
-        {
-            await Task.Delay(100);
-        }
+        yield return StartCoroutine(ReadNetTxt(HotUpdateDownLoadUrlHead + "HotUpdate.hash", (hash) =>
+         {
+             serverDllHash = hash;
+         }));
 
         if (nowDllHash != serverDllHash)
         {
@@ -142,12 +161,8 @@ public class HotUpdateStarter : MonoBehaviour
         //确认boundle是否需要更新
         string nowBoundleHash = ReadLocalTxt($"catalog_{Application.version}.hash");
         string serverBoundleHash = "";
-        StartCoroutine(ReadNetTxt(HotUpdateDownLoadUrlHead + $"catalog_{Application.version}.hash", (hash) => { serverBoundleHash = hash; }));
+        yield return StartCoroutine(ReadNetTxt(HotUpdateDownLoadUrlHead + $"catalog_{Application.version}.hash", (hash) => { serverBoundleHash = hash; }));
 
-        while (serverBoundleHash == "")
-        {
-            await Task.Delay(100);
-        }
 
         if (nowBoundleHash != serverBoundleHash)
         {
@@ -156,12 +171,11 @@ public class HotUpdateStarter : MonoBehaviour
         //如果dll和bundle都是最新的，则不需要热更
         if (isDllOld == false && isBundleOld == false)
         {
-            return false;
+            yield break;
         }
         else//否者进入选择性更新
         {
-            StartCoroutine(SelectUpdateRoutine(isDllOld, isBundleOld));
-            return true;
+            yield return StartCoroutine(SelectUpdateRoutine(isDllOld, isBundleOld));
         }
 
 
@@ -169,6 +183,7 @@ public class HotUpdateStarter : MonoBehaviour
 
         IEnumerator FullUpdateRoutine()
         {
+            isUpdating = true;
             DeleteAllFilesAndFolders(HotUpdateDataPath);
             CreateUpdateFlagFile(HotUpdateDataPath);
 
@@ -187,6 +202,7 @@ public class HotUpdateStarter : MonoBehaviour
             targetUpdatepercent = 90;
             yield return DownloadFile(HotUpdateDownLoadUrlHead + $"catalog_{Application.version}.hash", Path.Combine(HotUpdateDataPath, $"catalog_{Application.version}.hash"));
             targetUpdatepercent = 99;
+            //fixCatalogJson();
             File.Delete(Path.Combine(HotUpdateDataPath, "Update.flag"));
 
             targetUpdatepercent = 100;
@@ -198,6 +214,7 @@ public class HotUpdateStarter : MonoBehaviour
 
         IEnumerator SelectUpdateRoutine(bool dllUpdate, bool boundleUpdate)
         {
+            isUpdating = true;
             CreateUpdateFlagFile(HotUpdateDataPath);
             if (dllUpdate)
             {
@@ -245,6 +262,7 @@ public class HotUpdateStarter : MonoBehaviour
 
                 yield return DownloadFile(HotUpdateDownLoadUrlHead + $"catalog_{Application.version}.hash", Path.Combine(HotUpdateDataPath, $"catalog_{Application.version}.hash"));
                 targetUpdatepercent = 85;
+                //fixCatalogJson();
                 File.Delete(Path.Combine(HotUpdateDataPath, "Update.flag"));
                 targetUpdatepercent = 88;
             }
@@ -255,9 +273,35 @@ public class HotUpdateStarter : MonoBehaviour
             SceneManager.LoadScene(currentSceneName);
         }
 
+
+
     }
 
+    // [ContextMenu("修复catalog.json")]
+    // void fixCatalogJson()
+    // {
+    //     string jsonStr = ReadLocalTxt($"catalog_{Application.version}.json");
+    //     Debug.Log(jsonStr);
 
+    //     AAcatalogData catalogData = JsonConvert.DeserializeObject<AAcatalogData>(jsonStr);
+
+    //     List<string> newInternalIds = new List<string>();
+    //     foreach (string item in catalogData.m_InternalIds)
+    //     {
+
+    //         if (item.Contains(".bundle"))
+    //         {
+    //             newInternalIds.Add(Path.Combine(HotUpdateDataPath, Path.GetFileName(item)));
+    //         }
+    //         else
+    //         {
+    //             newInternalIds.Add(item);
+    //         }
+    //     }
+    //     catalogData.m_InternalIds = newInternalIds;
+    //     string newJsonStr = JsonConvert.SerializeObject(catalogData);
+    //     File.WriteAllText(Path.Combine(HotUpdateDataPath, $"catalog_{Application.version}.json"), newJsonStr);
+    // }
     List<string> GetAllBundleFileNamesByCatalogJson()
     {
         List<string> fileNames = new List<string>();
@@ -413,7 +457,7 @@ public class HotUpdateStarter : MonoBehaviour
         // 检查是否有错误
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("下载文件失败: " + fileUrl +"------------------"+ request.error);
+            Debug.LogError("下载文件失败: " + fileUrl + "------------------" + request.error);
             Destroy(this);
         }
         else
