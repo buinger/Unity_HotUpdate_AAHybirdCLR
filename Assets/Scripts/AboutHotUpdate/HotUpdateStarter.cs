@@ -52,18 +52,17 @@ public class HotUpdateStarter : MonoBehaviour
 #if !UNITY_EDITOR
         if (ifCheckUpdate)
         {
-            yield return CheckHotUpdate();          
+            yield return CheckHotUpdate();
         }
-        //yield return ReloadCatalog();
-        Assembly hotUpdateAss = Assembly.Load(File.ReadAllBytes(GetTargetDllPath()));
 #else
 
         // Editor下无需加载，直接查找获得HotUpdate程序集
         Assembly hotUpdateAss = System.AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "HotUpdate");
-#endif
         //跳转场景
         Addressables.LoadSceneAsync(mainScenePath, LoadSceneMode.Single).Completed += OnSceneLoaded;
         yield return null;
+#endif
+
     }
 
 
@@ -171,11 +170,15 @@ public class HotUpdateStarter : MonoBehaviour
         //如果dll和bundle都是最新的，则不需要热更
         if (isDllOld == false && isBundleOld == false)
         {
+            Assembly hotUpdateAss = Assembly.Load(File.ReadAllBytes(GetTargetDllPath()));
+            //跳转场景
+            Addressables.LoadSceneAsync(mainScenePath, LoadSceneMode.Single).Completed += OnSceneLoaded;
             yield break;
         }
         else//否者进入选择性更新
         {
             yield return StartCoroutine(SelectUpdateRoutine(isDllOld, isBundleOld));
+            yield break;
         }
 
 
@@ -263,10 +266,10 @@ public class HotUpdateStarter : MonoBehaviour
                 yield return DownloadFile(HotUpdateDownLoadUrlHead + $"catalog_{Application.version}.hash", Path.Combine(HotUpdateDataPath, $"catalog_{Application.version}.hash"));
                 targetUpdatepercent = 85;
                 //fixCatalogJson();
-                File.Delete(Path.Combine(HotUpdateDataPath, "Update.flag"));
+
                 targetUpdatepercent = 88;
             }
-
+            File.Delete(Path.Combine(HotUpdateDataPath, "Update.flag"));
             targetUpdatepercent = 100;
             yield return new WaitForSeconds(0.5f);
             string currentSceneName = SceneManager.GetActiveScene().name;
