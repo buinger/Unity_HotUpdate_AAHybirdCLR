@@ -33,8 +33,13 @@ public class HotUpdateTool
         Debug.Log("所有热更资源更新完毕");
     }
 
-    [MenuItem("资源操作/更新热更代码", priority = 101)]
-    public static void UpdateHotUpdateDll(bool isCompile = true)
+   [MenuItem("资源操作/更新热更代码", priority = 101)]
+    private static void UpdateHotUpdateDllManual()
+    {
+        UpdateHotUpdateDll();
+    }
+
+    private static void UpdateHotUpdateDll(bool isCompile = true)
     {
         if (isCompile)
         {
