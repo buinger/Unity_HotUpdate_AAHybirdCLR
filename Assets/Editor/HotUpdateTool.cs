@@ -231,7 +231,7 @@ public class HotUpdateTool
     }
 
 
-    [MenuItem("资源操作/一键刷新热更预制件索引脚本", priority = 102)]
+    [MenuItem("资源操作/修正热更文件地址和PrefabInfo", priority = 102)]
     public static void SetAllAAPrefabName()
     {
         string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Prefabs" });

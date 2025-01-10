@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class ResourceTool : MonoBehaviour
 {
-    [MenuItem("资源操作/将选中脚本转化成utf8格式 %&U", priority = 250)]
+    [MenuItem("资源操作/将选中脚本转化成utf8格式 %&U", priority = 205)]
     public static void ConvertScriptsToUtf8()
     {
         object[] allTargetObj = Selection.objects;//这个函数可以得到你选中的对象
