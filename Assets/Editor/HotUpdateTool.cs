@@ -23,7 +23,7 @@ public class HotUpdateTool
             return Path.Combine(Addressables.RuntimePath, "BuildTarget");
         }
     }
-    private static string serverUrlHead = "https://ipet.huanzer.com";
+    private static string serverUrlHead = "http://127.0.0.1";
 
     [MenuItem("资源操作/更新所有", priority = 100)]
     public static async void UpdateAll()
@@ -115,8 +115,8 @@ public class HotUpdateTool
     }
 
 
-    [MenuItem("资源操作/上传所有到服务器", priority = 108)]
-    public async static void UpLoadAllToServer()
+     [MenuItem("资源操作/干净上传(慢)", priority = 108)]
+    public async static void UpLoadAllToServer1()
     {
         string[] filePath = Directory.GetFiles(GetNowPlatformHotUpdateFolderPath());
 
@@ -131,81 +131,90 @@ public class HotUpdateTool
                 await UploadFileAsync(filePath[i]);
             }
         }
-
         Debug.Log($"{EditorUserBuildSettings.activeBuildTarget.ToString()}平台所有热更资源上传完毕");
+    }
+    [MenuItem("资源操作/增量上传(快速)", priority = 109)]
+    public async static void UpLoadAllToServer2()
+    {
+        string[] filePath = Directory.GetFiles(GetNowPlatformHotUpdateFolderPath());
 
-        async Task UploadFileAsync(string filePath, bool clearFolder = false)
+        for (int i = 0; i < filePath.Length; i++)
         {
-            // 检查文件是否存在
-            if (!System.IO.File.Exists(filePath))
-            {
-                Debug.LogError("文件不存在: " + filePath);
-                return;
-            }
+            await UploadFileAsync(filePath[i]);
+        }
+        Debug.Log($"{EditorUserBuildSettings.activeBuildTarget.ToString()}平台所有热更资源上传完毕");
+    }
 
-            // 读取文件内容
-            byte[] fileData = System.IO.File.ReadAllBytes(filePath);
+    static async Task UploadFileAsync(string filePath, bool clearFolder = false)
+    {
+        // 检查文件是否存在
+        if (!System.IO.File.Exists(filePath))
+        {
+            Debug.LogError("文件不存在: " + filePath);
+            return;
+        }
 
-            string clearFolderTail = clearFolder ? "&clearFolder=true" : "";
-            // 创建上传请求
-            UnityWebRequest request = new UnityWebRequest(GetUpLoadUrl() + clearFolderTail, UnityWebRequest.kHttpVerbPOST);
+        // 读取文件内容
+        byte[] fileData = System.IO.File.ReadAllBytes(filePath);
 
-            // 生成请求边界
-            string boundary = "----UnityFormBoundary";
-            byte[] boundaryBytes = Encoding.ASCII.GetBytes("\r\n--" + boundary + "\r\n");
+        string clearFolderTail = clearFolder ? "&clearFolder=true" : "";
+        // 创建上传请求
+        UnityWebRequest request = new UnityWebRequest(GetUpLoadUrl() + clearFolderTail, UnityWebRequest.kHttpVerbPOST);
 
-            // 构造表单数据
-            byte[] fileNameBytes = Encoding.UTF8.GetBytes($"Content-Disposition: form-data; name=\"file\"; filename=\"{Path.GetFileName(filePath)}\"\r\n");
-            byte[] fileHeaderBytes = Encoding.UTF8.GetBytes("Content-Type: application/octet-stream\r\n\r\n");
+        // 生成请求边界
+        string boundary = "----UnityFormBoundary";
+        byte[] boundaryBytes = Encoding.ASCII.GetBytes("\r\n--" + boundary + "\r\n");
 
-            // 构造完整的 multipart 数据
-            List<byte> formData = new List<byte>();
-            formData.AddRange(boundaryBytes);
-            formData.AddRange(fileNameBytes);
-            formData.AddRange(fileHeaderBytes);
-            formData.AddRange(fileData); // 添加文件数据
-            formData.AddRange(Encoding.ASCII.GetBytes("\r\n--" + boundary + "--\r\n")); // 结束边界
+        // 构造表单数据
+        byte[] fileNameBytes = Encoding.UTF8.GetBytes($"Content-Disposition: form-data; name=\"file\"; filename=\"{Path.GetFileName(filePath)}\"\r\n");
+        byte[] fileHeaderBytes = Encoding.UTF8.GetBytes("Content-Type: application/octet-stream\r\n\r\n");
 
-            // 设置上传处理器
-            request.uploadHandler = new UploadHandlerRaw(formData.ToArray());
-            request.downloadHandler = new DownloadHandlerBuffer();
+        // 构造完整的 multipart 数据
+        List<byte> formData = new List<byte>();
+        formData.AddRange(boundaryBytes);
+        formData.AddRange(fileNameBytes);
+        formData.AddRange(fileHeaderBytes);
+        formData.AddRange(fileData); // 添加文件数据
+        formData.AddRange(Encoding.ASCII.GetBytes("\r\n--" + boundary + "--\r\n")); // 结束边界
 
-            // 设置 Content-Type 为 multipart/form-data，并添加文件字段
-            request.SetRequestHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+        // 设置上传处理器
+        request.uploadHandler = new UploadHandlerRaw(formData.ToArray());
+        request.downloadHandler = new DownloadHandlerBuffer();
 
-            // 发送请求并等待响应
-            var operation = request.SendWebRequest();
+        // 设置 Content-Type 为 multipart/form-data，并添加文件字段
+        request.SetRequestHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
 
-            while (!operation.isDone)
-            {
-                await Task.Yield(); // 异步等待完成
-            }
+        // 发送请求并等待响应
+        var operation = request.SendWebRequest();
 
-            // 检查结果
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                Debug.Log("文件上传成功: " + filePath);
-            }
-            else
-            {
-                Debug.LogError("文件上传失败: " + filePath + "-------------" + request.error);
-            }
+        while (!operation.isDone)
+        {
+            await Task.Yield(); // 异步等待完成
+        }
 
-
-            // 释放相关资源
-            request.uploadHandler?.Dispose();  // Dispose of UploadHandlerRaw
-            request.downloadHandler?.Dispose();  // Dispose of DownloadHandlerBuffer
-            request.Dispose();  // Dispose of UnityWebRequest itself
-
-            formData.Clear();  // 清空 List<byte>
-            formData = null;  // 手动将引用设为 null
-            fileData = null;  // 手动将文件数据引用设为 null
+        // 检查结果
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("文件上传成功: " + filePath);
+        }
+        else
+        {
+            Debug.LogError("文件上传失败: " + filePath + "-------------" + request.error);
         }
 
 
+        // 释放相关资源
+        request.uploadHandler?.Dispose();  // Dispose of UploadHandlerRaw
+        request.downloadHandler?.Dispose();  // Dispose of DownloadHandlerBuffer
+        request.Dispose();  // Dispose of UnityWebRequest itself
+
+        formData.Clear();  // 清空 List<byte>
+        formData = null;  // 手动将引用设为 null
+        fileData = null;  // 手动将文件数据引用设为 null
     }
 
-    [MenuItem("资源操作/打开当前平台热更资源文件夹", priority = 109)]
+
+    [MenuItem("资源操作/打开当前平台热更资源文件夹", priority = 110)]
     public static void OpenTargetHotSourceFolder()
     {
 
@@ -219,14 +228,14 @@ public class HotUpdateTool
     private static string GetUpLoadUrl()
     {
         //private static string urlHead = "http://localhost:8080/upload/testFolder?password=123456";
-        string url = serverUrlHead + "/upload/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=qidawei.huanzer.2024";
+        string url = serverUrlHead + "/upload/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=123456";
         return url;
     }
 
     private static string GetDownUrl()
     {
         //private static string urlHead = "http://localhost:8080/upload/testFolder?password=123456";
-        string url = serverUrlHead + "/download/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=qidawei.huanzer.2024";
+        string url = serverUrlHead + "/download/" + EditorUserBuildSettings.activeBuildTarget.ToString() + "?password=123456";
         return url;
     }
 
