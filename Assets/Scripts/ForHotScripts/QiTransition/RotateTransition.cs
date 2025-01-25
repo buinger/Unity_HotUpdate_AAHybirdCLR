@@ -8,7 +8,7 @@ public class RotateTransition : Vector3Transition
 {
     [ContextMenu("设置开始数据")]
     protected override void SetStartData()
-    {      
+    {
         if (coordinateType == CoordinateType.World)
         {
             start_Vector3 = transform.eulerAngles;
@@ -20,7 +20,7 @@ public class RotateTransition : Vector3Transition
     }
     [ContextMenu("设置结束数据")]
     protected override void SetEndData()
-    {      
+    {
         if (coordinateType == CoordinateType.World)
         {
             to_Vector3 = transform.eulerAngles;
@@ -56,24 +56,48 @@ public class RotateTransition : Vector3Transition
             transform.eulerAngles = start_Vector3;
     }
 
-   
+
 
     protected override Tweener OwnDo(Vector3 endValue, Vector3 fromValue, CoordinateType _coordinateType, float _onecePassTime)
     {
         if (_coordinateType == CoordinateType.Self)
         {
-            return transform.DOLocalRotate(endValue, _onecePassTime,RotateMode.FastBeyond360).From(fromValue).Pause();
+            // 将角度值限制在 0 到 360 度之间
+            endValue = new Vector3(endValue.x % 360, endValue.y % 360, endValue.z % 360);
+            fromValue = new Vector3(fromValue.x % 360, fromValue.y % 360, fromValue.z % 360);
+
+            // 设置初始旋转
+            transform.localRotation = Quaternion.Euler(fromValue);
+
+            // 执行四元数插值旋转
+            return transform.DOLocalRotateQuaternion(Quaternion.Euler(endValue), _onecePassTime).Pause();
         }
         else
         {
-            return transform.DORotate(endValue, _onecePassTime, RotateMode.FastBeyond360).From(fromValue).Pause();
+            // 将世界欧拉角转换为本地欧拉角
+            Quaternion localEndValue = Quaternion.Euler(transform.InverseTransformDirection(endValue));
+            Quaternion localFromValue = Quaternion.Euler(transform.InverseTransformDirection(fromValue));
+
+            // 设置初始旋转
+            transform.rotation = Quaternion.Euler(fromValue);
+
+            // 执行四元数插值旋转
+            return transform.DORotateQuaternion(Quaternion.Euler(endValue), _onecePassTime).Pause();
         }
+        // if (_coordinateType == CoordinateType.Self)
+        // {
+        //     return transform.DOLocalRotate(endValue, _onecePassTime,RotateMode.FastBeyond360).From(fromValue).Pause();
+        // }
+        // else
+        // {
+        //     return transform.DORotate(endValue, _onecePassTime, RotateMode.FastBeyond360).From(fromValue).Pause();
+        // }
     }
 
 
     protected override void PlayOutTrans()
     {
-        base.PlayOutTrans();
+        //base.PlayOutTrans();
         Vector3[] aimValues;
         if (coordinateType == CoordinateType.Self)
         {
@@ -84,7 +108,7 @@ public class RotateTransition : Vector3Transition
         {
             aimValues = GetVector3Value(transform.eulerAngles, out_Vector3, out_TransitionAxis);
         }
-        tweenerOut.ChangeStartValue(aimValues[0], out_OnecePassTime);
+        tweenerOut.ChangeStartValue(Quaternion.Euler(aimValues[0]), out_OnecePassTime);
 
         tweenerOut.Restart(true);
 

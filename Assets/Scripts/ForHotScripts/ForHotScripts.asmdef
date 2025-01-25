@@ -1,0 +1,16 @@
+{
+    "name": "ForHotScripts",
+    "rootNamespace": "",
+    "references": [
+        "GUID:72154a4bfa9e5744587c2a9f6f353630"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
