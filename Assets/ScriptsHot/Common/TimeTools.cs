@@ -118,10 +118,10 @@ public class ColdTimeMachine
     }
 
 
-    public ColdTimeMachine(float _cdTime)
-    {
-        cdTime = _cdTime;
-    }
+    // public ColdTimeMachine(float _cdTime)
+    // {
+    //     cdTime = _cdTime;
+    // }
 
     public void ChangeCdTime(float _cdTime)
     {
