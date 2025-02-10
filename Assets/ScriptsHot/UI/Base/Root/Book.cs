@@ -4,9 +4,32 @@ using UnityEngine;
 
 public class Book : MonoBehaviour
 {
+
+    public bool awakeToPage1 = false;
     public List<GameObject> pages = new List<GameObject>();
 
-   
+    /// <summary>
+    /// Awake is called when the script instance is being loaded.
+    /// </summary>
+    protected virtual void Awake()
+    {
+        foreach (var item in pages)
+        {
+            item.SetActive(true);
+        }
+    }
+
+    private void Start()
+    {
+        foreach (var item in pages)
+        {
+            item.SetActive(false);
+        }
+        if (awakeToPage1)
+        {
+            ChangePageTo(1);
+        }
+    }
 
     public void ChangePageByPageName(string _name)
     {

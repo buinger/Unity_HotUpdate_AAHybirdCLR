@@ -50,12 +50,12 @@ public abstract class ElementPanel<T> : StaticUi
             }
             else
             {
-                Debug.LogError("Ìí¼ÓÔªËØÊ§°Ü£¬ÔªËØÒÑ´æÔÚ£º" + trans.name);
+                Debug.LogError("æ·»åŠ å…ƒç´ å¤±è´¥ï¼Œå…ƒç´ å·²å­˜åœ¨ï¼š" + trans.name);
             }
         }
         else
         {
-            Debug.LogError("Ìí¼ÓÔªËØÊ§°Ü£¬ÕÒ²»µ½ÔªËØµÄ×é¼ş£º" + trans.name);
+            Debug.LogError("æ·»åŠ å…ƒç´ å¤±è´¥ï¼Œæ‰¾ä¸åˆ°å…ƒç´ çš„ç»„ä»¶ï¼š" + trans.name);
         }
 
     }
@@ -70,7 +70,7 @@ public abstract class ElementPanel<T> : StaticUi
         }
         else
         {
-            Debug.LogError("ÒÆ³ıÔªËØ³ö´í£¬²»´æÔÚ´ËÔªËØ£º" + trans.name);
+            Debug.LogError("ç§»é™¤å…ƒç´ å‡ºé”™ï¼Œä¸å­˜åœ¨æ­¤å…ƒç´ ï¼š" + trans.name);
         }
     }
 
@@ -202,7 +202,7 @@ public abstract class ElementDragPanel<T> : ElementPanel<T>
                         nowDragElementLastSiblingIndex = nowDragElement.transform.GetSiblingIndex();
                         nowDragElement.transform.SetParent(dragFather);
                         nowDragElement.transform.SetAsLastSibling();
-                        // Ç¿ÖÆÖØĞÂ¹¹½¨²¼¾Ö
+                        // å¼ºåˆ¶é‡æ–°æ„å»ºå¸ƒå±€
                         // LayoutRebuilder.ForceRebuildLayoutImmediate(gridLayoutGroup.GetComponent<RectTransform>());
 
                         OnBeginDrag(nowDragElement);
@@ -219,7 +219,7 @@ public abstract class ElementDragPanel<T> : ElementPanel<T>
             nowDragElement.transform.SetParent(elementContainer);
             if (allUis.Count <= 1)
             {
-                Debug.Log("ÍÏ×§µ½¿Õ°×´¦");
+                Debug.Log("æ‹–æ‹½åˆ°ç©ºç™½å¤„");
                 if (nowDragElementLastSiblingIndex >= 0)
                 {
                     nowDragElement.transform.SetSiblingIndex(nowDragElementLastSiblingIndex);
@@ -267,14 +267,14 @@ public abstract class ElementDragPanel<T> : ElementPanel<T>
 
             }
             gridLayoutGroup.enabled = true;
-            // Ç¿ÖÆÖØĞÂ¹¹½¨²¼¾Ö
+            // å¼ºåˆ¶é‡æ–°æ„å»ºå¸ƒå±€
             LayoutRebuilder.ForceRebuildLayoutImmediate(gridLayoutGroup.GetComponent<RectTransform>());
             OnEndDrag(nowDragElement);
             nowDragElement = null;
         }
         else if (holdingBreak == false && clickDownElement != null && holdingPassTime <= holdingCd / 2)
         {
-            Debug.Log("µã»÷ÁË" + clickDownElement.name);
+            Debug.Log("ç‚¹å‡»äº†" + clickDownElement.name);
         }
         nowDragElementLastSiblingIndex = -1;
         holdingPassTime = 0;
@@ -301,7 +301,7 @@ public abstract class ElementDragPanel<T> : ElementPanel<T>
                     Debug.Log(element.name + "---" + targetTrans.name);
                 }
 
-                // ÕÒµ½¾àÀë×îĞ¡µÄÔªËØ
+                // æ‰¾åˆ°è·ç¦»æœ€å°çš„å…ƒç´ 
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
