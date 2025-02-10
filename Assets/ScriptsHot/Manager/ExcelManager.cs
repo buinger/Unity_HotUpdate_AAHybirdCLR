@@ -12,12 +12,15 @@ using System.Text;
 /// </summary>
 public class ExcelManager : Manager<ExcelManager>
 {
+
+    public const string defaultWriteBackFolder = "Assets/Excel/WriteBack";
+
     //行：分割数据标识 \n
     private readonly static char[] SPLIT_ROW = new char[] { '\n' };
     //列：分割数据标识 \t
     private readonly static char[] SPLIT_COL = new char[] { '\t' };
 
-    private static Dictionary<string, Excel> loadedExcel = new Dictionary<string, Excel>();
+    private static Dictionary<string, FileExcel> loadedExcel = new Dictionary<string, FileExcel>();
 
     public bool preLoadOver = false;
 
@@ -27,44 +30,28 @@ public class ExcelManager : Manager<ExcelManager>
 
         IEnumerator PreloadTables()
         {
-            string preLoadTablePath = Application.streamingAssetsPath + "/Excel/PreloadPath.txt";
-            yield return LoadExcel_IEnumerator(preLoadTablePath);
-            Excel excel = GetExcel(preLoadTablePath);
-            if (excel == null)
+            string[] allTxtFilePath = GetAllTxtFilePath(Path.Combine(Application.streamingAssetsPath, "Excel"));
+            for (int i = 0; i < allTxtFilePath.Length; i++)
             {
-                Debug.LogError("不存在预加载表格");
+                yield return StartCoroutine(LoadExcel_IEnumerator(allTxtFilePath[i]));
             }
-            else
-            {
-                List<string> paths = excel.GetColumnList()[0];
-                for (int i = 1; i < paths.Count; i++)
-                {
-                    string fullPath = Application.streamingAssetsPath + "/Excel/" + paths[i];
-                    if (paths[i].Contains(".txt"))
-                    {
-                        //Debug.Log(paths[i]+":加载完毕");
-                        yield return StartCoroutine(LoadExcel_IEnumerator(fullPath));
-                    }
-                    //else
-                    //{
-                    //    if (Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.WindowsPlayer)
-                    //    {
-                    //        string[] txtFiles = Directory.GetFiles(fullPath, "*.txt");
-                    //        foreach (string filePath in txtFiles)
-                    //        {
-                    //            StartCoroutine(ExcelManager.LoadExcel_IEnumerator(filePath));
-                    //        }
-                    //    }    
-                    //}
-                }
-            }
-
             preLoadOver = true;
         }
     }
 
+    string[] GetAllTxtFilePath(string path)
+    {
+        // 如果路径不存在，返回空数组
+        if (!Directory.Exists(path))
+        {
+            Debug.LogError("路径不存在: " + path);
+            return new string[0];
+        }
 
-    private static Encoding GetEncoding()
+        // 获取所有txt文件，包括子目录中的文件
+        return Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
+    }
+    public static Encoding GetEncoding()
     {
         return Encoding.GetEncoding("GB2312");
     }
@@ -75,7 +62,7 @@ public class ExcelManager : Manager<ExcelManager>
     /// <param name="path"></param>
     /// <param name="txtContent"></param>
     /// <returns></returns>
-    private static Excel StringToExcel(string path, string txtContent)
+    static FileExcel StringToExcel(string path, string txtContent)
     {
         List<List<string>> cells = new List<List<string>>();
         string[] lines = GetTxtLines(txtContent);
@@ -84,7 +71,7 @@ public class ExcelManager : Manager<ExcelManager>
             List<string> lineCells = GetLineCells(item).ToList();
             cells.Add(lineCells);
         }
-        return new Excel(path, cells);
+        return new FileExcel(path, cells);
 
         string[] GetLineCells(string value, bool trimEmpty = false)
         {
@@ -100,13 +87,40 @@ public class ExcelManager : Manager<ExcelManager>
         }
     }
 
+
+    public static Excel StringToExcel(string txtContent)
+    {
+        List<List<string>> cells = new List<List<string>>();
+        string[] lines = GetTxtLines(txtContent);
+        foreach (var item in lines)
+        {
+            List<string> lineCells = GetLineCells(item).ToList();
+            cells.Add(lineCells);
+        }
+        return new Excel(cells);
+
+        string[] GetLineCells(string value, bool trimEmpty = false)
+        {
+            StringSplitOptions option = trimEmpty ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None;
+            return value.Split(SPLIT_COL, option);
+        }
+
+        string[] GetTxtLines(string fileTxt)
+        {
+            fileTxt = fileTxt.Replace("\r\n", "\n");
+            string[] aimString = fileTxt.Split(SPLIT_ROW, StringSplitOptions.RemoveEmptyEntries);
+            return aimString;
+        }
+    }
+
+
     /// <summary>
     /// 主线程加载表格数据
     /// </summary>
     /// <param name="path"></param>
     /// <param name="force"></param>
     /// <returns></returns>
-    public static Excel GetExcel(string path, bool force = false)
+    public static FileExcel GetExcel(string path, bool force = false)
     {
         if (loadedExcel.ContainsKey(path))
         {
@@ -195,7 +209,7 @@ public class ExcelManager : Manager<ExcelManager>
     /// </summary>
     /// <param name="target"></param>
     /// <param name="aimFilePath"></param>
-    public static void WriteExcel(Excel target, string aimFilePath = "")
+    public static void WriteExcel(FileExcel target, string aimFilePath = "")
     {
         if (Application.platform == RuntimePlatform.WindowsEditor)
         {
@@ -233,24 +247,71 @@ public class ExcelManager : Manager<ExcelManager>
         {
             Debug.LogError("并非编辑器环境，不进行写回excel文件");
         }
+    }
 
-        string ExcelToString(Excel excel)
+
+    /// <summary>
+    /// 将excel类转回文本文件并写入路径
+    /// </summary>
+    /// <param name="target"></param>
+    /// <param name="aimFilePath"></param>
+    public static void WriteExcel(Excel target, string aimFilePath)
+    {
+        if (Application.platform == RuntimePlatform.WindowsEditor)
         {
-            string txtContent = "";
-            for (int i = 0; i < excel.rowCount; i++)
+            string path;
+            if (aimFilePath == "")
             {
-                for (int j = 0; j < excel[i].Count; j++)
-                {
-                    txtContent += excel[i, j];
-                    if (j != excel[i].Count - 1)
-                    {
-                        txtContent += '\t';
-                    }
-                }
-                txtContent += "\r\n";
+                Debug.LogError("写入文件时出错: 未指定文件路径");
+                return;
             }
-            return txtContent;
+            else
+            {
+                path = aimFilePath;
+            }
+            string fullPath = path;
+            //BackupFile(fullPath);
+
+            string content = ExcelToString(target);
+            try
+            {
+                // 创建一个 StreamWriter 实例来写入文件
+                //false, Encoding.GetEncoding("GB2312")
+                using (StreamWriter writer = new StreamWriter(fullPath, false, GetEncoding()))
+                {
+                    // 写入文本内容
+                    writer.Write(content);
+                }
+
+                Debug.Log("表格文本已写入到文件: " + fullPath);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError("写入文件时出错: " + e.Message);
+            }
         }
+        else
+        {
+            Debug.LogError("并非编辑器环境，不进行写回excel文件");
+        }
+    }
+
+    static string ExcelToString(Excel excel)
+    {
+        string txtContent = "";
+        for (int i = 0; i < excel.rowCount; i++)
+        {
+            for (int j = 0; j < excel[i].Count; j++)
+            {
+                txtContent += excel[i, j];
+                if (j != excel[i].Count - 1)
+                {
+                    txtContent += '\t';
+                }
+            }
+            txtContent += "\r\n";
+        }
+        return txtContent;
     }
 
     /// <summary>
@@ -299,16 +360,15 @@ public class ExcelManager : Manager<ExcelManager>
 }
 
 
-
 public class Excel
 {
-    List<List<string>> allRows = new List<List<string>>();
+    protected List<List<string>> allRows = new List<List<string>>();
 
-    public string sourcePath;
-    public Excel(string path, List<List<string>> cells)
+
+    public Excel(List<List<string>> cells)
     {
         allRows = cells;
-        sourcePath = path;
+
     }
 
     public List<List<string>> GetColumnList()
@@ -376,7 +436,7 @@ public class Excel
     {
         if (allRows.Count != 0)
         {
-            if (index == 0 || index < allRows.Count)
+            if (index == 0 || index <= allRows.Count)
             {
                 allRows.Insert(index, newRow);
             }
@@ -491,25 +551,66 @@ public class Excel
             }
         }
     }
+}
 
+
+public class FileExcel : Excel
+{
+    public string sourcePath;
+    public FileExcel(string path, List<List<string>> cells) : base(cells)
+    {
+        sourcePath = path;
+    }
 }
 
 
 public abstract class ExcelObject<T>
 {
+
+
     public Excel excel;
     public Dictionary<string, T> dictionary = new Dictionary<string, T>();
     public List<T> list = new List<T>();
-
-    public ExcelObject(string shortPath)
+    public void WriteBackToFile(string fullPath = "")
     {
-        string fullPath = Application.streamingAssetsPath + "/Excel/" + shortPath;
+        FileExcel fExcel = excel as FileExcel;
+        if (fExcel != null)
+        {
+            ExcelManager.WriteExcel(fExcel, fullPath);
+        }
+        else
+        {
+            if (fullPath != "")
+            {
+                //获取文件夹名
+                string folderPath = Path.GetDirectoryName(fullPath);
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+                ExcelManager.WriteExcel(excel, fullPath);
+            }
+            else
+            {
+                Debug.LogError("当前excel不是-文件excel-，无法写回");
+            }
+        }
+
+    }
+
+
+    public ExcelObject(string fullFliePath)
+    {
+        string fullPath = fullFliePath;
         excel = ExcelManager.GetExcel(fullPath);
         SetDicAndListValue();
     }
-    public void WriteBackToFile(string fullPath = "")
+
+    public ExcelObject(TextAsset txt)
     {
-        ExcelManager.WriteExcel(excel, fullPath);
+        string fileContent = ExcelManager.GetEncoding().GetString(txt.bytes);
+        excel = ExcelManager.StringToExcel(fileContent);
+        SetDicAndListValue();
     }
 
     private void SetDicAndListValue()
@@ -523,9 +624,42 @@ public abstract class ExcelObject<T>
     {
         for (int index = 1; index < excel.rowCount; index++)
         {
-            AddValueByExcelIndex(index);
+            SetDicAndListValueByExcelIndex(index);
         }
     }
-    protected abstract void AddValueByExcelIndex(int index);
+    protected abstract void SetDicAndListValueByExcelIndex(int index);
 
+    public virtual void AddNewElement(string keyName, T value)
+    {
+        Debug.LogError("请重写AddNewElement方法");
+
+        // if (!dictionary.ContainsKey(keyName))
+        // {
+        //     dictionary.Add(keyName, value);
+        //     list.Add(value);
+        //     string[] xxx = new string[] { value.id, value.name, value.intro, value.weight_Min.ToString(), value.weight_Max.ToString(), value.priceOfMinWeight.ToString(), value.getProbability.ToString(), value.rareLevel.ToString() };
+        //     if (excel.rowCount - 1 >= 0)
+        //     {
+        //         excel.AddRow(excel.rowCount, xxx.ToList());
+        //     }
+
+        // }
+
+    }
+
+    //--------------------写入示范
+
+    // for (int i = 0; i < fishPrefab.Length; i++)
+    // {
+    //     FishInfo fishInfo = new FishInfo();
+    //     fishInfo.id = (1 + i + 1000).ToString();
+    //     fishInfo.name = fishPrefab[i].name;
+    //     fishInfo.intro = "这是一条鱼";
+    //     fishInfo.weight_Min = 0;
+    //     fishInfo.weight_Max = 0;
+    //     fishInfo.rareLevel = 0;
+    //     fishInfoExcel.AddNewElement(fishInfo.id, fishInfo);
+    // }
+    // fishInfoExcel.WriteBackToFile(ExcelManager.defaultWriteBackFolder + "/FishInfo.txt");
 }
+

@@ -27,6 +27,11 @@ public class UiManager : Manager<UiManager>
     [SerializeField]
     private PrefabInfo ConfirmAndCancel_Window;
 
+    [SerializeField]
+    private PrefabInfo MultiSelection_Window;
+    [SerializeField]
+    private PrefabInfo AutoHideTip_Window;
+
     private static GraphicRaycaster graphicRaycaster;
     private static EventSystem eventSystem;
     private static PointerEventData eventData;
@@ -94,6 +99,14 @@ public class UiManager : Manager<UiManager>
 
                 path = ConfirmAndCancel_Window.path;
                 break;
+
+            case CommonWindowType.MultiSelection:
+
+                path = MultiSelection_Window.path;
+                break;
+            case CommonWindowType.AutoHideTip_Window:
+                path = AutoHideTip_Window.path;
+                break;
         }
 
         if (path == "")
@@ -108,6 +121,9 @@ public class UiManager : Manager<UiManager>
 
         switch (type)
         {
+            case CommonWindowType.AutoHideTip_Window:
+                (uiWin as AutoHideTip_Window).SetTextValue(data.ToString());
+                break;
             case CommonWindowType.Tip:
                 (uiWin as Tip_Window).SetTextValue(data.ToString());
                 break;
@@ -120,6 +136,10 @@ public class UiManager : Manager<UiManager>
             case CommonWindowType.ConfirmAndCancel:
                 (uiWin as ConfirmAndCancel_Window).SetAllValue(data as ConfirmAndCancelData);
                 break;
+            case CommonWindowType.MultiSelection:
+                (uiWin as MultiSelection_Window).SetTitleAndButton(data as MultiSelectionData);
+                break;
+            
         }
 
         return uiWin;
@@ -190,6 +210,18 @@ public class UiManager : Manager<UiManager>
             }
         }
         return false;
+    }
+
+    /// <summary>
+    /// 屏幕坐标是否在游戏画面上
+    /// </summary>
+    /// <param name="screenPostion"></param>
+    /// <returns></returns>
+    public bool IsPointOnGame(Vector3 screenPostion)
+    {
+        Vector3 mousePosition = Input.mousePosition;
+        return mousePosition.x >= 0 && mousePosition.x <= Screen.width &&
+               mousePosition.y >= 0 && mousePosition.y <= Screen.height;
     }
 
     /// <summary>
@@ -331,7 +363,11 @@ public enum CommonWindowType
     //图片提示窗口
     PictureConfirm,
     //确认取消窗口
-    ConfirmAndCancel
+    ConfirmAndCancel,
+    // 多选择窗口
+    MultiSelection,
+    // 自动隐藏提示窗口
+    AutoHideTip_Window
 }
 
 
