@@ -60,38 +60,38 @@ public class RotateTransition : Vector3Transition
 
     protected override Tweener OwnDo(Vector3 endValue, Vector3 fromValue, CoordinateType _coordinateType, float _onecePassTime)
     {
-        if (_coordinateType == CoordinateType.Self)
-        {
-            // 将角度值限制在 0 到 360 度之间
-            endValue = new Vector3(endValue.x % 360, endValue.y % 360, endValue.z % 360);
-            fromValue = new Vector3(fromValue.x % 360, fromValue.y % 360, fromValue.z % 360);
-
-            // 设置初始旋转
-            transform.localRotation = Quaternion.Euler(fromValue);
-
-            // 执行四元数插值旋转
-            return transform.DOLocalRotateQuaternion(Quaternion.Euler(endValue), _onecePassTime).Pause();
-        }
-        else
-        {
-            // 将世界欧拉角转换为本地欧拉角
-            Quaternion localEndValue = Quaternion.Euler(transform.InverseTransformDirection(endValue));
-            Quaternion localFromValue = Quaternion.Euler(transform.InverseTransformDirection(fromValue));
-
-            // 设置初始旋转
-            transform.rotation = Quaternion.Euler(fromValue);
-
-            // 执行四元数插值旋转
-            return transform.DORotateQuaternion(Quaternion.Euler(endValue), _onecePassTime).Pause();
-        }
         // if (_coordinateType == CoordinateType.Self)
         // {
-        //     return transform.DOLocalRotate(endValue, _onecePassTime,RotateMode.FastBeyond360).From(fromValue).Pause();
+        //     // 将角度值限制在 0 到 360 度之间
+        //     endValue = new Vector3(endValue.x % 360, endValue.y % 360, endValue.z % 360);
+        //     fromValue = new Vector3(fromValue.x % 360, fromValue.y % 360, fromValue.z % 360);
+
+        //     // 设置初始旋转
+        //     transform.localRotation = Quaternion.Euler(fromValue);
+
+        //     // 执行四元数插值旋转
+        //     return transform.DOLocalRotateQuaternion(Quaternion.Euler(endValue), _onecePassTime).Pause();
         // }
         // else
         // {
-        //     return transform.DORotate(endValue, _onecePassTime, RotateMode.FastBeyond360).From(fromValue).Pause();
+        //     // 将世界欧拉角转换为本地欧拉角
+        //     Quaternion localEndValue = Quaternion.Euler(transform.InverseTransformDirection(endValue));
+        //     Quaternion localFromValue = Quaternion.Euler(transform.InverseTransformDirection(fromValue));
+
+        //     // 设置初始旋转
+        //     transform.rotation = Quaternion.Euler(fromValue);
+
+        //     // 执行四元数插值旋转
+        //     return transform.DORotateQuaternion(Quaternion.Euler(endValue), _onecePassTime).Pause();
         // }
+        if (_coordinateType == CoordinateType.Self)
+        {
+            return transform.DOLocalRotate(endValue, _onecePassTime,RotateMode.FastBeyond360).From(fromValue).Pause();
+        }
+        else
+        {
+            return transform.DORotate(endValue, _onecePassTime, RotateMode.FastBeyond360).From(fromValue).Pause();
+        }
     }
 
 
