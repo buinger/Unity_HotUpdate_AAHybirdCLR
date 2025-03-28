@@ -103,22 +103,16 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 限制上传文件大小为 10000 MB
-	r.ParseMultipartForm(10000 << 20)
+	r.ParseMultipartForm(100000 << 20)
 
 	// 获取文件夹名称参数（从URL路径中提取）
 	parts := strings.Split(r.URL.Path, "/")
-
-	for index, value := range parts {
-		fmt.Printf("\n下标：%v,值：%v", index, value)
-	}
 
 	if len(parts) < 3 {
 		http.Error(w, "文件夹名称不能为空", http.StatusBadRequest)
 		return
 	}
 	folderName := parts[2]
-
-	fmt.Printf("\n文件夹名:%v", folderName)
 
 	// 获取上传的文件
 	file, header, err := r.FormFile("file")
@@ -130,8 +124,6 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 
 	fileName := header.Filename
 
-	fmt.Printf("\n文件名:%v", fileName)
-
 	// 获取当前程序目录并创建目标文件夹路径
 	currentDir, err := os.Getwd() // 获取当前工作目录
 	if err != nil {
@@ -140,14 +132,27 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hotSourceDir := filepath.Join(currentDir, "HotUpdateData")
-	// 创建目标文件夹路径
 	dstFolder := filepath.Join(hotSourceDir, folderName)
-	err = os.MkdirAll(dstFolder, os.ModePerm) // 创建文件夹
+
+	// 创建目标文件夹路径
+	err = os.MkdirAll(dstFolder, os.ModePerm)
 	if err != nil {
 		http.Error(w, "创建文件夹失败: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// 目标文件路径
+	dstFilePath := filepath.Join(dstFolder, fileName)
+
+	// 仅检查 .bundle 文件是否存在
+	if strings.HasSuffix(fileName, ".bundle") {
+		if _, err := os.Stat(dstFilePath); err == nil {
+			http.Error(w, "文件已存在，不能重复上传", http.StatusConflict)
+			return
+		}
+	}
+
+	// 是否清空文件夹
 	if shouldClearFolderBeforeUpload(r) {
 		err = clearDirectory(dstFolder)
 		if err != nil {
@@ -155,10 +160,8 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// 清空文件夹中的所有文件
 
 	// 创建目标文件
-	dstFilePath := filepath.Join(dstFolder, fileName)
 	dst, err := os.Create(dstFilePath)
 	if err != nil {
 		http.Error(w, "文件保存失败: "+err.Error(), http.StatusInternalServerError)
@@ -175,7 +178,6 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 
 	// 返回成功消息
 	w.Write([]byte("文件上传成功"))
-
 }
 
 // 验证是否清空文件夹
