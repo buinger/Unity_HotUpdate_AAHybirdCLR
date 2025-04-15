@@ -141,6 +141,15 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 是否清空文件夹
+	if shouldClearFolderBeforeUpload(r) {
+		err = clearDirectory(dstFolder)
+		if err != nil {
+			http.Error(w, "清空文件夹失败: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
 	// 目标文件路径
 	dstFilePath := filepath.Join(dstFolder, fileName)
 
@@ -148,15 +157,6 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	if strings.HasSuffix(fileName, ".bundle") {
 		if _, err := os.Stat(dstFilePath); err == nil {
 			http.Error(w, "文件已存在，不能重复上传", http.StatusConflict)
-			return
-		}
-	}
-
-	// 是否清空文件夹
-	if shouldClearFolderBeforeUpload(r) {
-		err = clearDirectory(dstFolder)
-		if err != nil {
-			http.Error(w, "清空文件夹失败: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
