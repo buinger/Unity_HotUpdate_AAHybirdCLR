@@ -12,13 +12,15 @@ import (
 
 // 配置结构体
 type Config struct {
-	Password string `json:"password"`
-	Port     string `json:"port"`
+	Password  string `json:"password"`
+	Port      string `json:"port"`
+	MaxUpLoad int    `json:"maxUpLoad"`
 }
 
 // 全局变量存储密码和端口
 var validPassword string
 var serverPort string
+var maxUpLoad int64
 
 func main() {
 	// 读取配置文件
@@ -66,6 +68,10 @@ func loadConfig(filePath string) error {
 	serverPort = config.Port
 	fmt.Println(serverPort)
 
+	// 设置端口
+	maxUpLoad = int64(config.MaxUpLoad)
+	fmt.Println(maxUpLoad)
+
 	return nil
 }
 
@@ -103,7 +109,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 限制上传文件大小为 10000 MB
-	r.ParseMultipartForm(100000 << 20)
+	r.ParseMultipartForm(maxUpLoad << 20)
 
 	// 获取文件夹名称参数（从URL路径中提取）
 	parts := strings.Split(r.URL.Path, "/")
