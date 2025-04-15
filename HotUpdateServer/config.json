@@ -1,4 +1,5 @@
 {
     "password": "123456",
-    "port": "637"
+    "port": "637",
+    "maxUpLoad": 20000
 }
