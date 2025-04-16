@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 
 
@@ -90,7 +91,14 @@ public class GameObjectPoolTool : MonoBehaviour
         {
             GameObjectPool.ReleaseEmptyObj();
         }
+
+        // 最后清理Unity内存
+        Resources.UnloadUnusedAssets();
+        GC.Collect();
     }
+
+
+
 
 
     //-------------------------------Plot池
@@ -98,13 +106,17 @@ public class GameObjectPoolTool : MonoBehaviour
     public class GameObjectPool
     {
         //池字典
-        public static Dictionary<string, List<GameObject>> itemPool = new Dictionary<string, List<GameObject>>();
-        //加载过的资源
-        public static Dictionary<string, GameObject> loadedPrefabs = new Dictionary<string, GameObject>();
 
-        public static void ReleaseAll()
+        public static Dictionary<string, List<GameObject>> poolItem = new Dictionary<string, List<GameObject>>();
+        public static Dictionary<string, List<GameObject>> allItem = new Dictionary<string, List<GameObject>>();
+        //加载过的资源
+        public static Dictionary<string, AsyncOperationHandle<GameObject>> loadedPrefabs = new Dictionary<string, AsyncOperationHandle<GameObject>>();
+
+
+        static void DestoryAllObj()
         {
-            foreach (var item in itemPool)
+
+            foreach (var item in allItem)
             {
                 foreach (GameObject obj in item.Value)
                 {
@@ -114,13 +126,28 @@ public class GameObjectPoolTool : MonoBehaviour
                     }
                 }
             }
-            itemPool.Clear();
+            poolItem.Clear();
+            allItem.Clear();
+        }
+        public static void ReleaseAll()
+        {
+            // 先销毁池内的对象
+            DestoryAllObj();
+            foreach (var handle in GameObjectPool.loadedPrefabs)
+            {
+                if (handle.Value.IsValid())
+                {
+                    Addressables.Release(handle.Value);
+                }
+            }
+            GameObjectPool.loadedPrefabs.Clear();
         }
 
-        public static void ReleaseEmptyObj()
+
+        static void ClearEmptyObj()
         {
             List<GameObject> allEmptyObj = new List<GameObject>();
-            foreach (var item in itemPool)
+            foreach (var item in poolItem)
             {
                 List<GameObject> tempEmptyObj = new List<GameObject>();
                 foreach (GameObject obj in item.Value)
@@ -136,6 +163,42 @@ public class GameObjectPoolTool : MonoBehaviour
                     item.Value.Remove(obj);
                 }
             }
+            List<GameObject> tempAllEmptyObj = new List<GameObject>();
+            foreach (var item in allItem)
+            {
+                List<GameObject> tempEmptyObj = new List<GameObject>();
+                foreach (GameObject obj in item.Value)
+                {
+                    if (obj == null)
+                    {
+                        tempEmptyObj.Add(obj);
+                        tempAllEmptyObj.Add(obj);
+                    }
+                }
+                foreach (GameObject obj in tempEmptyObj)
+                {
+                    item.Value.Remove(obj);
+                }
+            }
+        }
+
+        public static void ReleaseEmptyObj()
+        {
+
+            ClearEmptyObj();
+
+            List<string> removePoolObjKey = new List<string>();
+            foreach (var item in allItem)
+            {
+                if (item.Value.Count == 0)
+                {
+                    if (loadedPrefabs[item.Key].IsValid())
+                    {
+                        Addressables.Release(loadedPrefabs[item.Key]);
+                    }
+                }
+            }
+
         }
 
 
@@ -147,34 +210,36 @@ public class GameObjectPoolTool : MonoBehaviour
             //    but.onClick.RemoveAllListeners();
             //}
 
-            if (itemPool.ContainsKey(gameObj.name) == false)
+            if (poolItem.ContainsKey(gameObj.name) == false)
             {
-                itemPool.Add(gameObj.name, new List<GameObject>());
+                poolItem.Add(gameObj.name, new List<GameObject>());
             }
 
             gameObj.SetActive(false);
 
-            if (!itemPool[gameObj.name].Contains(gameObj))
+            if (!poolItem[gameObj.name].Contains(gameObj))
             {
-                itemPool[gameObj.name].Add(gameObj);
+                poolItem[gameObj.name].Add(gameObj);
             }
+
         }
 
         public static GameObject OutPool(string assetPath)
         {
-            if (itemPool.ContainsKey(assetPath) == false)
+            if (poolItem.ContainsKey(assetPath) == false)
             {
-                itemPool.Add(assetPath, new List<GameObject>());
+                poolItem.Add(assetPath, new List<GameObject>());
             }
 
-            if (itemPool[assetPath].Count == 0)
+            if (poolItem[assetPath].Count == 0)
             {
                 return null;
             }
             else
             {
-                GameObject outGo = itemPool[assetPath][0];
-                itemPool[assetPath].Remove(outGo);
+                GameObject outGo = poolItem[assetPath][0];
+                poolItem[assetPath].Remove(outGo);
+
                 if (outGo != null)
                 {
                     //这里有竞争条件，可能要Lock      
@@ -233,8 +298,14 @@ public class GameObjectPoolTool : MonoBehaviour
 
             GameObject loadedObject = Instantiate(loadTask.Result);
             loadedObject.name = path;
-            InPool(loadedObject);
-
+            InPool(loadedObject); if (allItem.ContainsKey(assetPath) == false)
+            {
+                allItem.Add(assetPath, new List<GameObject>());
+            }
+            if (allItem[assetPath].Contains(loadedObject) == false)
+            {
+                allItem[assetPath].Add(loadedObject);
+            }
             yield return loadedObject;
 
         }
@@ -256,7 +327,14 @@ public class GameObjectPoolTool : MonoBehaviour
             GameObject loadedObject = Instantiate(loadTask.Result);
             loadedObject.name = path;
             InPool(loadedObject);
-
+            if (allItem.ContainsKey(assetPath) == false)
+            {
+                allItem.Add(assetPath, new List<GameObject>());
+            }
+            if (allItem[assetPath].Contains(loadedObject) == false)
+            {
+                allItem[assetPath].Add(loadedObject);
+            }
             return loadedObject;
         }
 
@@ -269,7 +347,14 @@ public class GameObjectPoolTool : MonoBehaviour
             GameObject loadedObject = Instantiate(gameObj);
             loadedObject.name = path;
             InPool(loadedObject);
-
+            if (allItem.ContainsKey(assetPath) == false)
+            {
+                allItem.Add(assetPath, new List<GameObject>());
+            }
+            if (allItem[assetPath].Contains(loadedObject) == false)
+            {
+                allItem[assetPath].Add(loadedObject);
+            }
             return loadedObject;
         }
 
@@ -278,53 +363,65 @@ public class GameObjectPoolTool : MonoBehaviour
         {
             if (loadedPrefabs.ContainsKey(address))
             {
-                return loadedPrefabs[address];
-            }
-            else
-            {
-                var handle = Addressables.LoadAssetAsync<GameObject>(address);
-
-                // 等待异步加载完成
-                await handle.Task;
-
-                if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+                if (loadedPrefabs[address].IsValid())
                 {
-                    GameObject gameObj = handle.Result;
-                    loadedPrefabs.Add(address, gameObj);
-                    return gameObj;
+                    return loadedPrefabs[address].Result;
                 }
                 else
                 {
-                    Debug.LogError($"Failed to load addressable asset: {address}");
-                    return null;
+                    loadedPrefabs.Remove(address);
                 }
             }
+            var handle = Addressables.LoadAssetAsync<GameObject>(address);
+
+            // 等待异步加载完成
+            await handle.Task;
+
+            if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+            {
+                GameObject gameObj = handle.Result;
+                loadedPrefabs.Add(address, handle);
+                return gameObj;
+            }
+            else
+            {
+                Debug.LogError($"Failed to load addressable asset: {address}");
+                return null;
+            }
+
         }
 
         static GameObject LoadGameObject(string address)
         {
             if (loadedPrefabs.ContainsKey(address))
             {
-                return loadedPrefabs[address];
-            }
-            else
-            {
-                // 使用同步阻塞等待异步加载
-                var handle = Addressables.LoadAssetAsync<GameObject>(address);
-                handle.WaitForCompletion();
-
-                if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+                if (loadedPrefabs[address].IsValid())
                 {
-                    GameObject gameObj = handle.Result;
-                    loadedPrefabs.Add(address, gameObj);
-                    return gameObj;
+                    return loadedPrefabs[address].Result;
                 }
                 else
                 {
-                    Debug.LogError($"Failed to load addressable asset: {address}");
-                    return null;
+                    loadedPrefabs.Remove(address);
                 }
             }
+
+            // 使用同步阻塞等待异步加载
+            var handle = Addressables.LoadAssetAsync<GameObject>(address);
+            handle.WaitForCompletion();
+
+            if (handle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
+            {
+                GameObject gameObj = handle.Result;
+                loadedPrefabs.Add(address, handle);
+
+                return gameObj;
+            }
+            else
+            {
+                Debug.LogError($"Failed to load addressable asset: {address}");
+                return null;
+            }
+
         }
     }
 }
