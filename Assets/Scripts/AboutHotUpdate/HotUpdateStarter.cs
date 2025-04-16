@@ -71,8 +71,8 @@ public class HotUpdateStarter : MonoBehaviour
         if (isUpdating)
         {
             loadingText.gameObject.SetActive(true);
-            nowUpdatePercent = Mathf.Lerp(nowUpdatePercent, targetUpdatepercent, 0.2f);
-            loadingText.text = "Ipet更新中:" + nowUpdatePercent.ToString("0") + "%";
+            nowUpdatePercent = Mathf.Lerp(nowUpdatePercent, targetUpdatepercent, 0.001f);
+            loadingText.text = "Ipet更新中:" + nowUpdatePercent.ToString("0.00") + "%";
         }
         else
         {
@@ -317,8 +317,12 @@ public class HotUpdateStarter : MonoBehaviour
         {
             if (item.Contains(".bundle"))
             {
-                string targetName = Path.GetFileName(item);
-                fileNames.Add(targetName);
+                //json中有些大文件过滤不作为热更
+                if (!item.Contains("LargeBundle"))
+                {
+                    string targetName = Path.GetFileName(item);
+                    fileNames.Add(targetName);
+                }
             }
         }
         return fileNames;
