@@ -230,6 +230,15 @@ public class HotUpdateTool
         System.Diagnostics.Process.Start(folderPath);
     }
 
+    [MenuItem("资源操作/更新所有并增量上传", priority = 111)]
+    public static async void UpdateAllAndUpdate()
+    {
+        await UpdateHotUpdateAAbundle();
+        UpdateHotUpdateDll();
+        Debug.Log("所有热更资源更新完毕");
+        UpLoadAllToServer2();
+    }
+
 
     [MenuItem("资源操作/修正热更文件地址和PrefabInfo", priority = 102)]
     public static void SetAllAAPrefabName()
