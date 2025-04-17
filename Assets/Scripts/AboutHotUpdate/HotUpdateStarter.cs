@@ -71,8 +71,15 @@ public class HotUpdateStarter : MonoBehaviour
         if (isUpdating)
         {
             loadingText.gameObject.SetActive(true);
-            nowUpdatePercent = Mathf.Lerp(nowUpdatePercent, targetUpdatepercent, 0.001f);
-            loadingText.text = "Ipet更新中:" + nowUpdatePercent.ToString("0.00") + "%";
+            if (targetUpdatepercent != 100)
+            {
+                nowUpdatePercent = Mathf.Lerp(nowUpdatePercent, targetUpdatepercent, 0.001f);
+                loadingText.text = "Ipet更新中:" + nowUpdatePercent.ToString("0.00") + "%";
+            }
+            else
+            {
+                loadingText.text = "Ipet更新中:100%";
+            }
         }
         else
         {
